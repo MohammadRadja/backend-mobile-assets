@@ -54,7 +54,7 @@ const resepController = {
   },
 
   // Pegawai: CRUD semua tabel kecuali admin
-  pegawaiCRUDPegawai: async (req, res) => {
+  pegawaiCRUDResep: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
       const { role } = req.user;
@@ -102,7 +102,7 @@ const resepController = {
   },
 
   // Pemilik: Hanya dapat melihat data
-  pemilikReadRekamMedis: async (req, res) => {
+  pemilikReadResep: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
       const { role } = req.user;

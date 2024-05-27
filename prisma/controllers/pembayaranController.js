@@ -102,7 +102,7 @@ const pembayaranController = {
   },
 
   // Pemilik: Hanya dapat melihat data
-  pemilikReadHewan: async (req, res) => {
+  pemilikReadPembayaran: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
       const { role } = req.user;

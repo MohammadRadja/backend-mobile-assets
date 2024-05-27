@@ -6,14 +6,23 @@ import resepController from "../controllers/resepController.js";
 
 const router = express.Router();
 
-// Middleware untuk memastikan akses hanya untuk admin
-router.use(authenticateToken, isAdmin);
+// Routes untuk Admin
+router.post(
+  "/resep",
+  authenticateToken,
+  isAdmin,
+  resepController.adminCRUDResep
+);
 
-// Routes untuk CRUD Resep
-router.post("/resep", resepController.createResep);
-router.get("/resep", resepController.getAllResep);
-router.get("/resep/:id", resepController.getResepById);
-router.put("/resep/:id", resepController.updateResep);
-router.delete("/resep/:id", resepController.deleteResep);
+// Routes untuk Pegawai
+router.post(
+  "/resep",
+  authenticateToken,
+  isEmployee,
+  resepController.pegawaiCRUDResep
+);
+
+// Routes untuk Pemilik
+router.get("/resep", authenticateToken, resepController.pemilikReadResep);
 
 export default router;

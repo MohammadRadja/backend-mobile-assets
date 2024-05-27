@@ -6,14 +6,27 @@ import rekamMedisController from "../controllers/rekammedisController.js";
 
 const router = express.Router();
 
-// Middleware untuk memastikan akses hanya untuk admin
-router.use(authenticateToken, isAdmin);
+// Routes untuk Admin
+router.post(
+  "/rekammedis",
+  authenticateToken,
+  isAdmin,
+  rekamMedisController.adminCRUDRekamMedis
+);
 
-// Routes untuk CRUD Rekam Medis
-router.post("/rekam-medis", rekamMedisController.createRekamMedis);
-router.get("/rekam-medis", rekamMedisController.getAllRekamMedis);
-router.get("/rekam-medis/:id", rekamMedisController.getRekamMedisById);
-router.put("/rekam-medis/:id", rekamMedisController.updateRekamMedis);
-router.delete("/rekam-medis/:id", rekamMedisController.deleteRekamMedis);
+// Routes untuk Pegawai
+router.post(
+  "/rekammedis",
+  authenticateToken,
+  isEmployee,
+  rekamMedisController.pegawaiCRUDRekamMedis
+);
+
+// Routes untuk Pemilik
+router.get(
+  "/rekammedis",
+  authenticateToken,
+  rekamMedisController.pemilikReadRekamMedis
+);
 
 export default router;

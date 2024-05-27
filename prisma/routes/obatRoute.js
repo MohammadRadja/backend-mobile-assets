@@ -6,8 +6,6 @@ import obatController from "../controllers/obatController.js";
 
 const router = express.Router();
 
-// Middleware untuk memastikan akses hanya untuk admin
-
 // Routes untuk Admin
 router.post("/obat", authenticateToken, isAdmin, obatController.adminCRUDObat);
 
@@ -16,10 +14,10 @@ router.post(
   "/obat",
   authenticateToken,
   isEmployee,
-  obatController.pegawaiCRUDobat
+  obatController.pegawaiCRUDObat
 );
 
 // Routes untuk Pemilik
-router.get("/obat", authenticateToken, obatController.pemilikReadObat);
+router.get("/obat", authenticateToken, obatController.PemilikReadObat);
 
 export default router;
