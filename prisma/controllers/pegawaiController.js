@@ -5,9 +5,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const PegawaiRegister = async (req, res) => {
-  const { nama, password, jabatan, alamat, no_telp } = req.body;
+  const { nama_pegawai, password, jabatan, alamat, no_telp } = req.body;
 
-  if (!nama || !password || !jabatan || !alamat || !no_telp) {
+  if (!nama_pegawai || !password || !jabatan || !alamat || !no_telp) {
     res.status(400).json({
       success: false,
       message: "nama, password, jabatan, alamat and no_telp are required",
