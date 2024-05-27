@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "mysql" // or "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id_admin   Int    @id @default(autoincrement())
+  username   String @unique
+  password   String
+  nama       String
+}
+
+model Pegawai {
+  id_pegawai Int    @id @default(autoincrement())
+  nama_pegawai String
+  password   String
+  jabatan     String
+  alamat      String
+  no_telp     String
+  rekam_medis RekamMedis[]
+}
+
+model Pemilik {
+  id_pemilik Int    @id @default(autoincrement())
+  nama_pemilik String
+  password   String
+  alamat      String
+  no_telp     String
+  hewan       Hewan[]
+  rekam_medis RekamMedis[]
+}
+
+model Hewan {
+  id_hewan   Int    @id @default(autoincrement())
+  id_pemilik Int
+  nama_hewan String
+  jenis_hewan String
+  umur       Int
+  berat      Float
+  jenis_kelamin String
+  pemilik    Pemilik @relation(fields: [id_pemilik], references: [id_pemilik])
+  rekam_medis RekamMedis[]
+}
+
+model Obat {
+  id_obat    Int    @id @default(autoincrement())
+  nama_obat  String
+  keterangan String
+  rekam_medis RekamMedis[]
+  resep       Resep[]
+}
+
+model RekamMedis {
+  id_rekam_medis Int    @id @default(autoincrement())
+  id_hewan       Int
+  id_pemilik     Int
+  id_pegawai     Int
+  id_obat        Int
+  keluhan        String
+  diagnosa       String
+  tgl_periksa    DateTime
+  hewan          Hewan @relation(fields: [id_hewan], references: [id_hewan])
+  pemilik        Pemilik @relation(fields: [id_pemilik], references: [id_pemilik])
+  pegawai        Pegawai @relation(fields: [id_pegawai], references: [id_pegawai])
+  obat           Obat @relation(fields: [id_obat], references: [id_obat])
+  pembayaran     Pembayaran?
+  resep          Resep?
+}
+
+model Pembayaran {
+  id_pembayaran  Int    @id @default(autoincrement())
+  id_rekam_medis Int    @unique
+  tgl_pembayaran DateTime
+  jumlah_pembayaran Float
+  rekam_medis    RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
+}
+
+model Resep {
+  id_resep     Int    @id @default(autoincrement())
+  id_rekam_medis Int  @unique
+  id_obat      Int
+  jumlah_obat  Int
+  rekam_medis  RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
+  obat         Obat @relation(fields: [id_obat], references: [id_obat])
+}
