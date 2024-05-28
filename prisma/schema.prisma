@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 datasource db {
-  provider = "mysql" // or "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -14,14 +8,15 @@ generator client {
 }
 
 model Admin {
-  id_admin   Int    @id @default(autoincrement())
-  username   String @unique
+  id_admin   Int      @id @default(autoincrement())
+  username   String   @unique
   password   String
   nama       String
+  createdAt  DateTime @default(now())
 }
 
 model Pegawai {
-  id_pegawai Int    @id @default(autoincrement())
+  id_pegawai Int      @id @default(autoincrement())
   nama_pegawai String
   password   String
   jabatan     String
@@ -31,7 +26,7 @@ model Pegawai {
 }
 
 model Pemilik {
-  id_pemilik Int    @id @default(autoincrement())
+  id_pemilik Int      @id @default(autoincrement())
   nama_pemilik String
   password   String
   alamat      String
@@ -41,27 +36,28 @@ model Pemilik {
 }
 
 model Hewan {
-  id_hewan   Int    @id @default(autoincrement())
-  id_pemilik Int
-  nama_hewan String
-  jenis_hewan String
-  umur       Int
-  berat      Float
+  id_hewan      Int      @id @default(autoincrement())
+  id_pemilik    Int
+  nama_hewan    String
+  jenis_hewan   String
+  umur          Int
+  berat         Float
   jenis_kelamin String
-  pemilik    Pemilik @relation(fields: [id_pemilik], references: [id_pemilik])
-  rekam_medis RekamMedis[]
+  pemilik       Pemilik  @relation(fields: [id_pemilik], references: [id_pemilik])
+  rekam_medis   RekamMedis[]
+  appointments  Appointment[] 
 }
 
 model Obat {
-  id_obat    Int    @id @default(autoincrement())
-  nama_obat  String
-  keterangan String
+  id_obat      Int      @id @default(autoincrement())
+  nama_obat    String
+  keterangan   String
   rekam_medis RekamMedis[]
-  resep       Resep[]
+  resep        Resep[]
 }
 
 model RekamMedis {
-  id_rekam_medis Int    @id @default(autoincrement())
+  id_rekam_medis Int       @id @default(autoincrement())
   id_hewan       Int
   id_pemilik     Int
   id_pegawai     Int
@@ -69,27 +65,44 @@ model RekamMedis {
   keluhan        String
   diagnosa       String
   tgl_periksa    DateTime
-  hewan          Hewan @relation(fields: [id_hewan], references: [id_hewan])
-  pemilik        Pemilik @relation(fields: [id_pemilik], references: [id_pemilik])
-  pegawai        Pegawai @relation(fields: [id_pegawai], references: [id_pegawai])
-  obat           Obat @relation(fields: [id_obat], references: [id_obat])
+  hewan          Hewan     @relation(fields: [id_hewan], references: [id_hewan])
+  pemilik        Pemilik   @relation(fields: [id_pemilik], references: [id_pemilik])
+  pegawai        Pegawai   @relation(fields: [id_pegawai], references: [id_pegawai])
+  obat           Obat      @relation(fields: [id_obat], references: [id_obat])
   pembayaran     Pembayaran?
   resep          Resep?
 }
 
 model Pembayaran {
-  id_pembayaran  Int    @id @default(autoincrement())
-  id_rekam_medis Int    @unique
-  tgl_pembayaran DateTime
+  id_pembayaran   Int        @id @default(autoincrement())
+  id_rekam_medis  Int        @unique
+  tgl_pembayaran  DateTime
   jumlah_pembayaran Float
-  rekam_medis    RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
+  rekam_medis     RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
 }
 
 model Resep {
-  id_resep     Int    @id @default(autoincrement())
-  id_rekam_medis Int  @unique
-  id_obat      Int
-  jumlah_obat  Int
-  rekam_medis  RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
-  obat         Obat @relation(fields: [id_obat], references: [id_obat])
+  id_resep        Int        @id @default(autoincrement())
+  id_rekam_medis Int        @unique
+  id_obat         Int
+  jumlah_obat     Int
+  rekam_medis     RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
+  obat            Obat       @relation(fields: [id_obat], references: [id_obat])
+}
+
+model Appointment {
+  id_appointment  Int      @id @default(autoincrement())
+  id_hewan        Int
+  id_dokter       Int
+  tgl_appointment DateTime
+  catatan         String?
+  hewan           Hewan    @relation(fields: [id_hewan], references: [id_hewan])
+  dokter          Doctor   @relation(fields: [id_dokter], references: [id_dokter])
+}
+
+model Doctor {
+  id_dokter       Int       @id @default(autoincrement())
+  nama_dokter     String
+  spesialisasi    String
+  appointments    Appointment[]
 }

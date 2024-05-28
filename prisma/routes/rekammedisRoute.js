@@ -1,14 +1,19 @@
 // routes/rekamMedisRoutes.js
 
 import express from "express";
-import { authenticateToken, isAdmin } from "../middlewares/authMiddleware.js";
+import {
+  authenticateToken,
+  isAdmin,
+  isEmployee,
+  isOwner,
+} from "../middlewares/authMiddleware.js";
 import rekamMedisController from "../controllers/rekammedisController.js";
 
 const router = express.Router();
 
 // Routes untuk Admin
 router.post(
-  "/rekammedis",
+  "/admin/rekammedis",
   authenticateToken,
   isAdmin,
   rekamMedisController.adminCRUDRekamMedis
@@ -16,7 +21,7 @@ router.post(
 
 // Routes untuk Pegawai
 router.post(
-  "/rekammedis",
+  "/pegawai/rekammedis",
   authenticateToken,
   isEmployee,
   rekamMedisController.pegawaiCRUDRekamMedis
@@ -24,8 +29,9 @@ router.post(
 
 // Routes untuk Pemilik
 router.get(
-  "/rekammedis",
+  "/pemilik/rekammedis",
   authenticateToken,
+  isOwner,
   rekamMedisController.pemilikReadRekamMedis
 );
 

@@ -4,6 +4,7 @@ CREATE TABLE `Admin` (
     `username` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `nama` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `Admin_username_key`(`username`),
     PRIMARY KEY (`id_admin`)
@@ -90,6 +91,26 @@ CREATE TABLE `Resep` (
     PRIMARY KEY (`id_resep`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `Appointment` (
+    `id_appointment` INTEGER NOT NULL AUTO_INCREMENT,
+    `id_hewan` INTEGER NOT NULL,
+    `id_dokter` INTEGER NOT NULL,
+    `tgl_appointment` DATETIME(3) NOT NULL,
+    `catatan` VARCHAR(191) NULL,
+
+    PRIMARY KEY (`id_appointment`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Doctor` (
+    `id_dokter` INTEGER NOT NULL AUTO_INCREMENT,
+    `nama_dokter` VARCHAR(191) NOT NULL,
+    `spesialisasi` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`id_dokter`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Hewan` ADD CONSTRAINT `Hewan_id_pemilik_fkey` FOREIGN KEY (`id_pemilik`) REFERENCES `Pemilik`(`id_pemilik`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -113,3 +134,9 @@ ALTER TABLE `Resep` ADD CONSTRAINT `Resep_id_rekam_medis_fkey` FOREIGN KEY (`id_
 
 -- AddForeignKey
 ALTER TABLE `Resep` ADD CONSTRAINT `Resep_id_obat_fkey` FOREIGN KEY (`id_obat`) REFERENCES `Obat`(`id_obat`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Appointment` ADD CONSTRAINT `Appointment_id_hewan_fkey` FOREIGN KEY (`id_hewan`) REFERENCES `Hewan`(`id_hewan`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Appointment` ADD CONSTRAINT `Appointment_id_dokter_fkey` FOREIGN KEY (`id_dokter`) REFERENCES `Doctor`(`id_dokter`) ON DELETE RESTRICT ON UPDATE CASCADE;

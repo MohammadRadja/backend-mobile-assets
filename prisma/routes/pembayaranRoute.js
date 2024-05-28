@@ -1,14 +1,19 @@
 // routes/pembayaranRoutes.js
 
 import express from "express";
-import { authenticateToken, isAdmin } from "../middlewares/authMiddleware.js";
+import {
+  authenticateToken,
+  isAdmin,
+  isEmployee,
+  isOwner,
+} from "../middlewares/authMiddleware.js";
 import pembayaranController from "../controllers/pembayaranController.js";
 
 const router = express.Router();
 
 // Routes untuk Admin
 router.post(
-  "/pembayaran",
+  "/admin/pembayaran",
   authenticateToken,
   isAdmin,
   pembayaranController.adminCRUDPembayaran
@@ -16,7 +21,7 @@ router.post(
 
 // Routes untuk Pegawai
 router.post(
-  "/pembayaran",
+  "/pegawai/pembayaran",
   authenticateToken,
   isEmployee,
   pembayaranController.pegawaiCRUDPembayaran
@@ -24,8 +29,9 @@ router.post(
 
 // Routes untuk Pemilik
 router.get(
-  "/pembayaran",
+  "/pemilik/pembayaran",
   authenticateToken,
+  isOwner,
   pembayaranController.pemilikReadPembayaran
 );
 

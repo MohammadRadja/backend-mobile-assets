@@ -14,9 +14,9 @@ const PegawaiRegister = async (req, res) => {
     });
     return;
   }
-  const existUsername = await prisma.user.findUnique({
+  const existUsername = await prisma.pegawai.findFirst({
     where: {
-      nama_pegawai,
+      nama_pegawai: nama_pegawai,
     },
   });
   if (existUsername) {
@@ -28,7 +28,7 @@ const PegawaiRegister = async (req, res) => {
   }
   try {
     const hash = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
+    const user = await prisma.pegawai.create({
       data: {
         nama_pegawai,
         password: hash,
@@ -41,10 +41,10 @@ const PegawaiRegister = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        nama_pegawai: user.nama_pegawai,
-        jabatan: user.jabatan,
-        alamat: user.alamat,
-        no_telp: user.no_telp,
+        nama_pegawai: pegawai.nama_pegawai,
+        jabatan: pegawai.jabatan,
+        alamat: pegawai.alamat,
+        no_telp: pegawai.no_telp,
       },
     });
   } catch (error) {
@@ -66,13 +66,13 @@ const PegawaiLogin = async (req, res) => {
     return;
   }
 
-  const user = await prisma.user.findUnique({
+  const pegawai = await prisma.pegawai.findFirst({
     where: {
-      nama_pegawai,
+      nama_pegawai: nama_pegawai,
     },
   });
 
-  if (!user) {
+  if (!pegawai) {
     res.status(401).json({
       success: false,
       message: "nama or password is incorrect",
@@ -80,7 +80,7 @@ const PegawaiLogin = async (req, res) => {
     return;
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, pegawai.password);
   if (!isMatch) {
     res.status(401).json({
       success: false,
@@ -89,15 +89,15 @@ const PegawaiLogin = async (req, res) => {
     return;
   }
 
-  const token = generateToken(user);
+  const token = generateToken(pegawai);
   res.status(200).json({
     success: true,
     data: {
-      user: {
-        nama_pegawai: user.nama_pegawai,
-        jabatan: user.jabatan,
-        alamat: user.alamat,
-        no_telp: user.no_telp,
+      pegawai: {
+        nama_pegawai: pegawai.nama_pegawai,
+        jabatan: pegawai.jabatan,
+        alamat: pegawai.alamat,
+        no_telp: pegawai.no_telp,
       },
 
       token,

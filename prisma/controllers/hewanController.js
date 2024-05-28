@@ -7,8 +7,8 @@ const hewanController = {
   adminCRUDHewan: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "admin") {
+      const tableName = req.user;
+      if (tableName !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -58,8 +58,8 @@ const hewanController = {
   pegawaiCRUDHewan: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "pegawai") {
+      const tableName = req.user;
+      if (tableName !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -109,8 +109,8 @@ const hewanController = {
   pemilikReadHewan: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
-      const { role } = req.user;
-      if (role !== "pemilik") {
+      const tableName = req.user;
+      if (tableName !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });

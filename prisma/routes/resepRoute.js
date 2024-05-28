@@ -1,14 +1,19 @@
 // routes/resepRoutes.js
 
 import express from "express";
-import { authenticateToken, isAdmin } from "../middlewares/authMiddleware.js";
+import {
+  authenticateToken,
+  isAdmin,
+  isEmployee,
+  isOwner,
+} from "../middlewares/authMiddleware.js";
 import resepController from "../controllers/resepController.js";
 
 const router = express.Router();
 
 // Routes untuk Admin
 router.post(
-  "/resep",
+  "/admin/resep",
   authenticateToken,
   isAdmin,
   resepController.adminCRUDResep
@@ -16,13 +21,18 @@ router.post(
 
 // Routes untuk Pegawai
 router.post(
-  "/resep",
+  "/pegawai/resep",
   authenticateToken,
   isEmployee,
   resepController.pegawaiCRUDResep
 );
 
 // Routes untuk Pemilik
-router.get("/resep", authenticateToken, resepController.pemilikReadResep);
+router.get(
+  "/pemilik/resep",
+  authenticateToken,
+  isOwner,
+  resepController.pemilikReadResep
+);
 
 export default router;

@@ -26,7 +26,26 @@ export const authenticateToken = (req, res, next) => {
       console.log(err);
       return res.status(403).json({ success: false, message: "Token invalid" });
     }
+    // Anda perlu menentukan tabel yang sesuai berdasarkan jenis pengguna
+    let tableName;
+    switch (user.role) {
+      case "admin":
+        tableName = "Admin";
+        break;
+      case "pegawai":
+        tableName = "Pegawai";
+        break;
+      case "pemilik":
+        tableName = "Pemilik";
+        break;
+      default:
+        return res
+          .status(403)
+          .json({ success: false, message: "Invalid user role" });
+    }
+    // Memasukkan informasi pengguna ke dalam properti req untuk digunakan oleh middleware otorisasi
     req.user = user;
+    req.tableName = tableName;
     next();
   });
 };
@@ -35,8 +54,8 @@ export const authenticateToken = (req, res, next) => {
 Admin
 */
 export const isAdmin = (req, res, next) => {
-  const { role } = req.user;
-  if (role != "admin") {
+  const tableName = req.tableName; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
+  if (tableName !== "Admin") {
     return res
       .status(401)
       .json({ success: false, message: "Admin Acces Only" });
@@ -48,8 +67,8 @@ export const isAdmin = (req, res, next) => {
 Pegawai
 */
 export const isEmployee = (req, res, next) => {
-  const { role } = req.user;
-  if (role != "pegawai") {
+  const tableName = req.tableName; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
+  if (tableName !== "Pemilik") {
     return res
       .status(401)
       .json({ success: false, message: "Pegawai Acces Only" });
@@ -61,7 +80,7 @@ export const isEmployee = (req, res, next) => {
 Pemilik
 */
 export const isOwner = (req, res, next) => {
-  const { role } = req.user;
+  const { role } = req.pemilik;
   if (role != "pemilik") {
     return res
       .status(401)

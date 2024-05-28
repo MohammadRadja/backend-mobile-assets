@@ -130,4 +130,4 @@ const pembayaranController = {
   },
 };
 
-export default hewanController;
+export default pembayaranController;
