@@ -10,8 +10,30 @@ import obatController from "../controllers/obatController.js";
 const router = express.Router();
 
 // Routes untuk Admin
+//POST -> CREATE
 router.post(
   "/admin/obat",
+  authenticateToken,
+  isAdmin,
+  obatController.adminCRUDObat
+);
+//GET -> READ
+router.get(
+  "/admin/obat",
+  authenticateToken,
+  isAdmin,
+  obatController.adminCRUDObat
+);
+//PUT -> UPDATE
+router.put(
+  "/admin/obat/:id",
+  authenticateToken,
+  isAdmin,
+  obatController.adminCRUDObat
+);
+//DELETE
+router.delete(
+  "/admin/obat/:id",
   authenticateToken,
   isAdmin,
   obatController.adminCRUDObat

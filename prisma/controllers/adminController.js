@@ -13,9 +13,9 @@ const AdminRegister = async (req, res) => {
     });
     return;
   }
-  const existUsername = await prisma.admin.findUnique({
+  const existUsername = await prisma.admin.findFirst({
     where: {
-      username,
+      username: username,
     },
   });
   if (existUsername) {
