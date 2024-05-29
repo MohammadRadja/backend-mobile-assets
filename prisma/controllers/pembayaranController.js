@@ -1,5 +1,3 @@
-// controllers/pembayaranController.js
-
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -9,8 +7,8 @@ const pembayaranController = {
   adminCRUDPembayaran: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "admin") {
+      const { tableName } = req;
+      if (tableName !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -22,7 +20,6 @@ const pembayaranController = {
         case "create":
           result = await prisma.pembayaran.create({
             data: {
-              id_rekam_medis: data.id_rekam_medis,
               tgl_pembayaran: data.tgl_pembayaran,
               jumlah_pembayaran: data.jumlah_pembayaran,
             },
@@ -47,7 +44,7 @@ const pembayaranController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -57,8 +54,8 @@ const pembayaranController = {
   pegawaiCRUDPembayaran: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "pegawai") {
+      const { tableName } = req;
+      if (tableName !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -95,7 +92,7 @@ const pembayaranController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -105,8 +102,8 @@ const pembayaranController = {
   pemilikReadPembayaran: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
-      const { role } = req.user;
-      if (role !== "pemilik") {
+      const { tableName } = req;
+      if (tableName !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -123,7 +120,7 @@ const pembayaranController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }

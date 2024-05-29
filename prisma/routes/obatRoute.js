@@ -40,11 +40,33 @@ router.delete(
 );
 
 // Routes untuk Pegawai
+//POST -> CREATE
 router.post(
   "/pegawai/obat",
   authenticateToken,
-  isEmployee, // Pastikan Anda memiliki fungsi isEmployee yang ditentukan di middleware Anda
-  obatController.pegawaiCRUDObat
+  isEmployee,
+  obatController.adminCRUDObat
+);
+//GET -> READ
+router.get(
+  "/pegawai/obat",
+  authenticateToken,
+  isEmployee,
+  obatController.adminCRUDObat
+);
+//PUT -> UPDATE
+router.put(
+  "/pegawai/obat/:id",
+  authenticateToken,
+  isEmployee,
+  obatController.adminCRUDObat
+);
+//DELETE
+router.delete(
+  "/pegawai/obat/:id",
+  authenticateToken,
+  isEmployee,
+  obatController.adminCRUDObat
 );
 
 // Routes untuk Pemilik

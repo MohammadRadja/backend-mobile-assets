@@ -7,8 +7,8 @@ const rekammedisController = {
   adminCRUDRekamMedis: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "admin") {
+      const { tableName } = req;
+      if (tableName !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -20,10 +20,6 @@ const rekammedisController = {
         case "create":
           result = await prisma.rekammedis.create({
             data: {
-              id_hewan: data.id_hewan,
-              id_pemilik: data.id_pemilik,
-              id_pegawai: data.id_pegawai,
-              id_obat: data.id_obat,
               keluhan: data.keluhan,
               diagnosa: data.diagnosa,
               tgl_periksa: data.tgl_periksa,
@@ -49,7 +45,7 @@ const rekammedisController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -59,8 +55,8 @@ const rekammedisController = {
   pegawaiCRUDRekamMedis: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "pegawai") {
+      const { tableName } = req;
+      if (tableName !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -72,10 +68,6 @@ const rekammedisController = {
         case "create":
           result = await prisma.rekammedis.create({
             data: {
-              id_hewan: data.id_hewan,
-              id_pemilik: data.id_pemilik,
-              id_pegawai: data.id_pegawai,
-              id_obat: data.id_obat,
               keluhan: data.keluhan,
               diagnosa: data.diagnosa,
               tgl_periksa: data.tgl_periksa,
@@ -101,7 +93,7 @@ const rekammedisController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -111,8 +103,8 @@ const rekammedisController = {
   pemilikReadRekamMedis: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
-      const { role } = req.user;
-      if (role !== "pemilik") {
+      const { tableName } = req;
+      if (tableName !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -129,7 +121,7 @@ const rekammedisController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }

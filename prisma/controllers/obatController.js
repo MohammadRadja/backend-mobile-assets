@@ -7,8 +7,8 @@ const obatController = {
   adminCRUDObat: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "admin") {
+      const { tableName } = req;
+      if (tableName !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -26,7 +26,7 @@ const obatController = {
           });
           break;
         case "read":
-          result = await prisma.obat.findMany();
+          (action = read), (result = await prisma.obat.findMany());
           break;
         case "update":
           result = await prisma.obat.update({
@@ -44,7 +44,7 @@ const obatController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -54,8 +54,8 @@ const obatController = {
   pegawaiCRUDObat: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "pegawai") {
+      const { tableName } = req;
+      if (tableName !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -101,8 +101,8 @@ const obatController = {
   PemilikReadObat: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
-      const { role } = req.user;
-      if (role !== "pemilik") {
+      const { tableName } = req;
+      if (tableName !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });

@@ -9,8 +9,8 @@ const resepController = {
   adminCRUDResep: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "admin") {
+      const { tableName } = req;
+      if (tableName !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -22,8 +22,6 @@ const resepController = {
         case "create":
           result = await prisma.resep.create({
             data: {
-              id_rekam_medis: data.id_rekam_medis,
-              id_obat: data.id_obat,
               jumlah_obat: data.jumlah_obat,
             },
           });
@@ -47,7 +45,7 @@ const resepController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -57,8 +55,8 @@ const resepController = {
   pegawaiCRUDResep: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { role } = req.user;
-      if (role !== "pegawai") {
+      const { tableName } = req;
+      if (tableName !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -70,8 +68,6 @@ const resepController = {
         case "create":
           result = await prisma.resep.create({
             data: {
-              id_rekam_medis: data.id_rekam_medis,
-              id_obat: data.id_obat,
               jumlah_obat: data.jumlah_obat,
             },
           });
@@ -95,7 +91,7 @@ const resepController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -105,8 +101,8 @@ const resepController = {
   pemilikReadResep: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
-      const { role } = req.user;
-      if (role !== "pemilik") {
+      const { tableName } = req;
+      if (tableName !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -123,7 +119,7 @@ const resepController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }

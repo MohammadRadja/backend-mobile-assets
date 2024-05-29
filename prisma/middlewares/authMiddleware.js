@@ -83,7 +83,6 @@ Admin
 */
 export const isAdmin = (req, res, next) => {
   const tableName = req.tableName; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
-  console.log("Checking Admin Access, tableName:", tableName);
   if (tableName !== "admin") {
     return res
       .status(401)

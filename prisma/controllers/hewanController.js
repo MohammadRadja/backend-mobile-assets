@@ -49,7 +49,7 @@ const hewanController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -128,7 +128,7 @@ const hewanController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
+      return res.status(200).json({ success: action, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }

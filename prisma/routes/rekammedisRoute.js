@@ -11,20 +11,64 @@ import rekamMedisController from "../controllers/rekammedisController.js";
 
 const router = express.Router();
 
-// Routes untuk Admin
+/* Routes untuk Admin */
+//POST -> CREATE
 router.post(
   "/admin/rekammedis",
   authenticateToken,
   isAdmin,
   rekamMedisController.adminCRUDRekamMedis
 );
+//GET -> READ
+router.get(
+  "/admin/rekammedis",
+  authenticateToken,
+  isAdmin,
+  rekamMedisController.adminCRUDRekamMedis
+);
+//PUT -> UPDATE
+router.put(
+  "/admin/rekammedis/:id",
+  authenticateToken,
+  isAdmin,
+  rekamMedisController.adminCRUDRekamMedis
+);
+//DELETE
+router.delete(
+  "/admin/rekammedis/:id",
+  authenticateToken,
+  isAdmin,
+  rekamMedisController.adminCRUDRekamMedis
+);
 
-// Routes untuk Pegawai
+/* Routes untuk Pegawai */
+//POST -> CREATE
 router.post(
   "/pegawai/rekammedis",
   authenticateToken,
   isEmployee,
-  rekamMedisController.pegawaiCRUDRekamMedis
+  rekamMedisController.adminCRUDRekamMedis
+);
+//GET -> READ
+router.get(
+  "/pegawai/rekammedis",
+  authenticateToken,
+  isEmployee,
+  rekamMedisController.adminCRUDRekamMedis
+);
+//PUT -> UPDATE
+router.put(
+  "/pegawai/rekammedis/:id",
+  authenticateToken,
+  isEmployee,
+  rekamMedisController.adminCRUDRekamMedis
+);
+//DELETE
+router.delete(
+  "/pegawai/rekammedis/:id",
+  authenticateToken,
+  isEmployee,
+  rekamMedisController.adminCRUDRekamMedis
 );
 
 // Routes untuk Pemilik
