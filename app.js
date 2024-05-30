@@ -5,7 +5,9 @@ import obatRoute from "./prisma/routes/obatRoute.js";
 import pembayaranRoute from "./prisma/routes/pembayaranRoute.js";
 import rekammedisRoute from "./prisma/routes/rekammedisRoute.js";
 import resepRoute from "./prisma/routes/resepRoute.js";
-import authRoutes from "./prisma/routes/authRoute.js";
+import authRoute from "./prisma/routes/authRoute.js";
+import doctorRoute from "./prisma/routes/doctorRoute.js";
+import appointmentRoute from "./prisma/routes/appointmentRoute.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,7 +19,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 // Use auth routes
-app.use("/", authRoutes);
+app.use("/", authRoute);
 
 // Use other routes
 app.use("/", hewanRoute);
@@ -25,6 +27,10 @@ app.use("/", obatRoute);
 app.use("/", pembayaranRoute);
 app.use("/", rekammedisRoute);
 app.use("/", resepRoute);
+app.use("/", resepRoute);
+app.use("/", doctorRoute);
+app.use("/", appointmentRoute);
+
 !~(
   // Middleware logging
   app.use((req, res, next) => {
