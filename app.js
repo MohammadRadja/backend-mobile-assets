@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors"; // Import cors middleware
 import hewanRoute from "./prisma/routes/hewanRoute.js";
 import obatRoute from "./prisma/routes/obatRoute.js";
 import pembayaranRoute from "./prisma/routes/pembayaranRoute.js";
@@ -18,6 +19,9 @@ const port = process.env.PORT || 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+// Use cors middleware
+app.use(cors());
+
 // Use auth routes
 app.use("/", authRoute);
 
@@ -31,13 +35,11 @@ app.use("/", resepRoute);
 app.use("/", doctorRoute);
 app.use("/", appointmentRoute);
 
-!~(
-  // Middleware logging
-  app.use((req, res, next) => {
-    console.log(`Request URL: ${req.url}`);
-    next();
-  })
-);
+// Middleware logging
+app.use((req, res, next) => {
+  console.log(`Request URL: ${req.url}`);
+  next();
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
