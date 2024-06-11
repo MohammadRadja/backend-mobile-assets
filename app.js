@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import hewanRoute from "./prisma/routes/hewanRoute.js";
 import obatRoute from "./prisma/routes/obatRoute.js";
 import pembayaranRoute from "./prisma/routes/pembayaranRoute.js";
@@ -14,6 +15,13 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Middleware CORS
+const corsOptions = {
+  origin: "http://localhost:62493", // Ganti dengan asal frontend Anda
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
