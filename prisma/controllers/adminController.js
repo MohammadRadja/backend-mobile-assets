@@ -88,7 +88,8 @@ const AdminLogin = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
-        admin: {
+        role: "admin",
+        user: {
           nama: admin.nama,
           username: admin.username,
         },

@@ -5,24 +5,24 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const PemilikRegister = async (req, res) => {
-  const { nama_pemilik, password, alamat, no_telp } = req.body;
+  const { username, password, alamat, no_telp } = req.body;
 
-  if (!nama_pemilik || !password || !alamat || !no_telp) {
+  if (!username || !password || !alamat || !no_telp) {
     res.status(400).json({
       success: false,
-      message: "nama, password, alamat and no_telp are required",
+      message: "username, password, alamat and no_telp are required",
     });
     return;
   }
   const existUsername = await prisma.pemilik.findFirst({
     where: {
-      nama_pemilik: nama_pemilik,
+      username: username,
     },
   });
   if (existUsername) {
     res.status(400).json({
       success: false,
-      message: "nama already exist",
+      message: "username already exist",
     });
     return;
   }
@@ -30,7 +30,7 @@ const PemilikRegister = async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const user = await prisma.pemilik.create({
       data: {
-        nama_pemilik,
+        username,
         password: hash,
         alamat,
         no_telp,
@@ -40,7 +40,7 @@ const PemilikRegister = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        nama_pegawai: pemilik.nama_pegawai,
+        username: pemilik.username,
         jabatan: pemilik.jabatan,
         alamat: pemilik.alamat,
         no_telp: pemilik.no_telp,
@@ -55,26 +55,26 @@ const PemilikRegister = async (req, res) => {
 };
 
 const PemilikLogin = async (req, res) => {
-  const { nama_pemilik, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!nama_pemilik || !password) {
+  if (!username || !password) {
     res.status(400).json({
       success: false,
-      message: "nama and password are required",
+      message: "username and password are required",
     });
     return;
   }
 
   const pemilik = await prisma.pemilik.findFirst({
     where: {
-      nama_pemilik: nama_pemilik,
+      username: username,
     },
   });
 
   if (!pemilik) {
     res.status(401).json({
       success: false,
-      message: "nama or password is incorrect",
+      message: "username or password is incorrect",
     });
     return;
   }
@@ -83,7 +83,7 @@ const PemilikLogin = async (req, res) => {
   if (!isMatch) {
     res.status(401).json({
       success: false,
-      message: "nama or password is incorrect",
+      message: "username or password is incorrect",
     });
     return;
   }
@@ -92,9 +92,9 @@ const PemilikLogin = async (req, res) => {
   res.status(200).json({
     success: true,
     data: {
-      pemilik: {
-        nama_pegawai: pemilik.nama_pegawai,
-        jabatan: pemilik.jabatan,
+      role: "pemilik",
+      user: {
+        username: pemilik.username,
         alamat: pemilik.alamat,
         no_telp: pemilik.no_telp,
       },

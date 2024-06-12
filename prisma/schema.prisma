@@ -16,9 +16,9 @@ model Admin {
 }
 
 model Pegawai {
-  id_pegawai Int      @id @default(autoincrement())
-  nama_pegawai String
-  password   String
+  id_pegawai  Int      @id @default(autoincrement())
+  username    String
+  password    String
   jabatan     String
   alamat      String
   no_telp     String
@@ -26,9 +26,9 @@ model Pegawai {
 }
 
 model Pemilik {
-  id_pemilik Int      @id @default(autoincrement())
-  nama_pemilik String
-  password   String
+  id_pemilik  Int      @id @default(autoincrement())
+  username    String
+  password    String
   alamat      String
   no_telp     String
   hewan       Hewan[]

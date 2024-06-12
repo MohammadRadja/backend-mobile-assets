@@ -13,7 +13,7 @@ CREATE TABLE `Admin` (
 -- CreateTable
 CREATE TABLE `Pegawai` (
     `id_pegawai` INTEGER NOT NULL AUTO_INCREMENT,
-    `nama_pegawai` VARCHAR(191) NOT NULL,
+    `username` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `jabatan` VARCHAR(191) NOT NULL,
     `alamat` VARCHAR(191) NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE `Pegawai` (
 -- CreateTable
 CREATE TABLE `Pemilik` (
     `id_pemilik` INTEGER NOT NULL AUTO_INCREMENT,
-    `nama_pemilik` VARCHAR(191) NOT NULL,
+    `username` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `alamat` VARCHAR(191) NOT NULL,
     `no_telp` VARCHAR(191) NOT NULL,

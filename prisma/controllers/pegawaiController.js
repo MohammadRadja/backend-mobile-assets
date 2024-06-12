@@ -5,24 +5,24 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const PegawaiRegister = async (req, res) => {
-  const { nama_pegawai, password, jabatan, alamat, no_telp } = req.body;
+  const { username, password, jabatan, alamat, no_telp } = req.body;
 
-  if (!nama_pegawai || !password || !jabatan || !alamat || !no_telp) {
+  if (!username || !password || !jabatan || !alamat || !no_telp) {
     res.status(400).json({
       success: false,
-      message: "nama, password, jabatan, alamat and no_telp are required",
+      message: "username, password, jabatan, alamat and no_telp are required",
     });
     return;
   }
   const existUsername = await prisma.pegawai.findFirst({
     where: {
-      nama_pegawai: nama_pegawai,
+      username: username,
     },
   });
   if (existUsername) {
     res.status(400).json({
       success: false,
-      message: "nama already exist",
+      message: "username already exist",
     });
     return;
   }
@@ -30,7 +30,7 @@ const PegawaiRegister = async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const user = await prisma.pegawai.create({
       data: {
-        nama_pegawai,
+        username,
         password: hash,
         jabatan,
         alamat,
@@ -41,7 +41,7 @@ const PegawaiRegister = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        nama_pegawai: pegawai.nama_pegawai,
+        username: pegawai.username,
         jabatan: pegawai.jabatan,
         alamat: pegawai.alamat,
         no_telp: pegawai.no_telp,
@@ -56,26 +56,26 @@ const PegawaiRegister = async (req, res) => {
 };
 
 const PegawaiLogin = async (req, res) => {
-  const { nama_pegawai, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!nama_pegawai || !password) {
+  if (!username || !password) {
     res.status(400).json({
       success: false,
-      message: "nama and password are required",
+      message: "username and password are required",
     });
     return;
   }
 
   const pegawai = await prisma.pegawai.findFirst({
     where: {
-      nama_pegawai: nama_pegawai,
+      username: username,
     },
   });
 
   if (!pegawai) {
     res.status(401).json({
       success: false,
-      message: "nama or password is incorrect",
+      message: "username or password is incorrect",
     });
     return;
   }
@@ -84,7 +84,7 @@ const PegawaiLogin = async (req, res) => {
   if (!isMatch) {
     res.status(401).json({
       success: false,
-      message: "nama or password is incorrect",
+      message: "username or password is incorrect",
     });
     return;
   }
@@ -93,8 +93,9 @@ const PegawaiLogin = async (req, res) => {
   res.status(200).json({
     success: true,
     data: {
+      role: "pegawai",
       pegawai: {
-        nama_pegawai: pegawai.nama_pegawai,
+        username: pegawai.username,
         jabatan: pegawai.jabatan,
         alamat: pegawai.alamat,
         no_telp: pegawai.no_telp,
