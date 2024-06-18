@@ -53,7 +53,11 @@ const hewanController = {
           break;
 
         case "read":
-          result = await prisma.hewan.findMany();
+          result = await prisma.hewan.findMany({
+            include: {
+              pemilik: true, // Assuming the relation name is 'pemilik'
+            },
+          });
           console.log("Read Result:", result);
           break;
 
@@ -61,6 +65,7 @@ const hewanController = {
           result = await prisma.hewan.update({
             where: { id_hewan: data.id_hewan },
             data: { ...data },
+            include: { pemilik: true },
           });
           console.log("Update Result:", result);
           break;
