@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+
+dotenv.config();
 
 export const generateToken = (user) => {
   let userId;
@@ -34,6 +37,18 @@ export const generateToken = (user) => {
   );
 };
 
+export const verifyToken = (token) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(decoded);
+      }
+    });
+  });
+};
+
 export const authenticateToken = async (req, res, next) => {
   const token = req.header("Authorization");
   if (!token) {
@@ -47,7 +62,6 @@ export const authenticateToken = async (req, res, next) => {
       console.log(err);
       return res.status(403).json({ success: false, message: "Token invalid" });
     }
-
     let user;
     if (decoded.role === "admin") {
       user = await prisma.admin.findFirst({

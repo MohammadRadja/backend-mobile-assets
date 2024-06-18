@@ -8,16 +8,17 @@ const hewanController = {
     try {
       // Pastikan user memiliki peran admin
       const { tableName } = req;
-      console.log("Table Name:", tableName);
+      // console.log("Table Name:", tableName);
       if (tableName !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
 
+      // Destructure action dan data dari req.body
       const { action, data } = req.body;
-      console.log("Action:", action);
-      console.log("Data:", data);
+      // console.log("Action:", action);
+      // console.log("Data:", data);
 
       let result;
       switch (action) {
@@ -50,10 +51,12 @@ const hewanController = {
           });
           console.log("Create Result:", result);
           break;
+
         case "read":
           result = await prisma.hewan.findMany();
           console.log("Read Result:", result);
           break;
+
         case "update":
           result = await prisma.hewan.update({
             where: { id_hewan: data.id_hewan },
@@ -61,17 +64,20 @@ const hewanController = {
           });
           console.log("Update Result:", result);
           break;
+
         case "delete":
           result = await prisma.hewan.delete({
             where: { id_hewan: data.id_hewan },
           });
           console.log("Delete Result:", result);
           break;
+
         default:
           return res
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
+
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("Error in adminCRUDHewan:", error);
