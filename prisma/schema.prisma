@@ -25,16 +25,6 @@ model Pegawai {
   rekam_medis RekamMedis[]
 }
 
-model Pemilik {
-  id_pemilik  Int      @id @default(autoincrement())
-  username    String
-  password    String
-  alamat      String
-  no_telp     String
-  hewan       Hewan[]
-  rekam_medis RekamMedis[]
-}
-
 model Hewan {
   id_hewan      Int      @id @default(autoincrement())
   id_pemilik    Int
@@ -47,6 +37,17 @@ model Hewan {
   rekam_medis   RekamMedis[]
   appointments  Appointment[] 
 }
+
+model Pemilik {
+  id_pemilik  Int      @id @default(autoincrement())
+  username    String
+  password    String
+  alamat      String
+  no_telp     String
+  hewan       Hewan[]
+  rekam_medis RekamMedis[]
+}
+
 
 model Obat {
   id_obat      Int      @id @default(autoincrement())

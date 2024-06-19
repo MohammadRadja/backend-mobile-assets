@@ -8,7 +8,6 @@ const hewanController = {
     try {
       // Pastikan user memiliki peran admin
       const { tableName } = req;
-      // console.log("Table Name:", tableName);
       if (tableName !== "admin") {
         return res
           .status(403)
@@ -17,8 +16,6 @@ const hewanController = {
 
       // Destructure action dan data dari req.body
       const { action, data } = req.body;
-      // console.log("Action:", action);
-      // console.log("Data:", data);
 
       let result;
       switch (action) {
@@ -32,7 +29,6 @@ const hewanController = {
             data.berat == null ||
             !data.jenis_kelamin
           ) {
-            console.log("Missing required fields:", data);
             return res
               .status(400)
               .json({ success: false, message: "Missing required fields" });
@@ -49,7 +45,6 @@ const hewanController = {
               jenis_kelamin: data.jenis_kelamin,
             },
           });
-          console.log("Create Result:", result);
           break;
 
         case "read":
@@ -58,23 +53,26 @@ const hewanController = {
               pemilik: true, // Assuming the relation name is 'pemilik'
             },
           });
-          console.log("Read Result:", result);
           break;
 
         case "update":
+          // Extract valid fields for update
+          const { id_hewan, ...updateData } = data;
+
+          // Update data including relation
           result = await prisma.hewan.update({
-            where: { id_hewan: data.id_hewan },
-            data: { ...data },
-            include: { pemilik: true },
+            where: { id_hewan },
+            data: updateData,
+            include: {
+              pemilik: true,
+            },
           });
-          console.log("Update Result:", result);
           break;
 
         case "delete":
           result = await prisma.hewan.delete({
             where: { id_hewan: data.id_hewan },
           });
-          console.log("Delete Result:", result);
           break;
 
         default:
@@ -134,10 +132,26 @@ const hewanController = {
           result = await prisma.hewan.findMany();
           break;
         case "update":
-          result = await prisma.hewan.update({
-            where: { id_hewan: data.id_hewan },
-            data: { ...data },
-          });
+          const {
+            id_hewan: idHewanToUpdate,
+            id_pemilik: idPemilikToUpdate,
+            ...updateDataPegawai
+          } = data; // Extract id_hewan and id_pemilik from data
+
+          const updatePayloadPegawai = {
+            where: { id_hewan: idHewanToUpdate },
+            data: {
+              ...updateDataPegawai,
+              pemilik: {
+                connect: { id_pemilik: idPemilikToUpdate },
+              },
+            },
+            include: {
+              pemilik: true,
+            },
+          };
+
+          result = await prisma.hewan.update(updatePayloadPegawai);
           break;
         case "delete":
           result = await prisma.hewan.delete({
@@ -151,6 +165,7 @@ const hewanController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
+      console.error("Error in pegawaiCRUDHewan:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },
@@ -179,6 +194,7 @@ const hewanController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
+      console.error("Error in pemilikReadHewan:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },
