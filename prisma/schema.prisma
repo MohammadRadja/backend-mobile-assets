@@ -12,6 +12,7 @@ model Admin {
   username   String   @unique
   password   String
   nama       String
+  jabatan    String
   createdAt  DateTime @default(now())
 }
 
@@ -22,6 +23,17 @@ model Pegawai {
   jabatan     String
   alamat      String
   no_telp     String
+  rekam_medis RekamMedis[]
+}
+
+model Pemilik {
+  id_pemilik  Int      @id @default(autoincrement())
+  username    String
+  password    String
+  jabatan     String
+  alamat      String
+  no_telp     String
+  hewan       Hewan[]
   rekam_medis RekamMedis[]
 }
 
@@ -37,17 +49,6 @@ model Hewan {
   rekam_medis   RekamMedis[]
   appointments  Appointment[] 
 }
-
-model Pemilik {
-  id_pemilik  Int      @id @default(autoincrement())
-  username    String
-  password    String
-  alamat      String
-  no_telp     String
-  hewan       Hewan[]
-  rekam_medis RekamMedis[]
-}
-
 
 model Obat {
   id_obat      Int      @id @default(autoincrement())

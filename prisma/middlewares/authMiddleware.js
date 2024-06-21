@@ -8,27 +8,27 @@ dotenv.config();
 export const generateToken = (user) => {
   let userId;
   let username;
-  let tableName;
+  let role;
 
   if (user.id_admin) {
     userId = user.id_admin;
     username = user.username;
-    tableName = "admin"; // Sesuaikan dengan format yang digunakan di middleware
+    role = user.jabatan_admin; // Sesuaikan dengan format yang digunakan di middleware
   } else if (user.id_pegawai) {
     userId = user.id_pegawai;
     username = user.nama_pegawai;
-    tableName = "pegawai"; // Sesuaikan dengan format yang digunakan di middleware
+    role = user.jabatan_pegawai; // Sesuaikan dengan format yang digunakan di middleware
   } else if (user.id_pemilik) {
     userId = user.id_pemilik;
     username = user.nama_pemilik;
-    tableName = "pemilik"; // Sesuaikan dengan format yang digunakan di middleware
+    role = user.jabatan_pemilik; // Sesuaikan dengan format yang digunakan di middleware
   }
 
   return jwt.sign(
     {
       id: userId,
       username: username,
-      role: tableName, // Menyertakan peran dalam payload
+      role: role, // Menyertakan peran dalam payload
     },
     process.env.JWT_SECRET,
     {
@@ -63,15 +63,15 @@ export const authenticateToken = async (req, res, next) => {
       return res.status(403).json({ success: false, message: "Token invalid" });
     }
     let user;
-    if (decoded.role === "admin") {
+    if (decoded.jabatan_admin === "admin") {
       user = await prisma.admin.findFirst({
         where: { username: decoded.username },
       });
-    } else if (decoded.role === "pegawai") {
+    } else if (decoded.jabatan_pegawai === "pegawai") {
       user = await prisma.pegawai.findFirst({
         where: { nama_pegawai: decoded.username },
       });
-    } else if (decoded.role === "pemilik") {
+    } else if (decoded.jabatan_pemilik === "pemilik") {
       user = await prisma.pemilik.findFirst({
         where: { nama_pemilik: decoded.username },
       });
@@ -86,7 +86,6 @@ export const authenticateToken = async (req, res, next) => {
         .json({ success: false, message: "Invalid user role" });
     }
 
-    req.tableName = decoded.role;
     req.user = user;
     next();
   });
@@ -96,8 +95,8 @@ export const authenticateToken = async (req, res, next) => {
 Admin
 */
 export const isAdmin = (req, res, next) => {
-  const tableName = req.tableName; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
-  if (tableName !== "admin") {
+  const user = req.user; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
+  if (user.jabatan_admin !== "admin") {
     return res
       .status(401)
       .json({ success: false, message: "Admin Access Only" });
@@ -108,8 +107,8 @@ export const isAdmin = (req, res, next) => {
 Pegawai
 */
 export const isEmployee = (req, res, next) => {
-  const tableName = req.tableName; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
-  if (tableName !== "pegawai") {
+  const user = req.user; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
+  if (user.jabatan_pegawai !== "pegawai") {
     return res
       .status(401)
       .json({ success: false, message: "Pegawai Access Only" });
@@ -120,8 +119,8 @@ export const isEmployee = (req, res, next) => {
 Pemilik
 */
 export const isOwner = (req, res, next) => {
-  const tableName = req.tableName; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
-  if (tableName !== "pemilik") {
+  const user = req.user; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
+  if (user !== "pemilik") {
     return res
       .status(401)
       .json({ success: false, message: "Pemilik Access Only" });
