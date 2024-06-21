@@ -55,54 +55,58 @@ const PemilikRegister = async (req, res) => {
 };
 
 const PemilikLogin = async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
 
-  if (!username || !password) {
-    res.status(400).json({
-      success: false,
-      message: "username and password are required",
-    });
-    return;
-  }
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "username and password are required",
+      });
+    }
 
-  const pemilik = await prisma.pemilik.findFirst({
-    where: {
-      username: username,
-    },
-  });
-
-  if (!pemilik) {
-    res.status(401).json({
-      success: false,
-      message: "username or password is incorrect",
-    });
-    return;
-  }
-
-  const isMatch = await bcrypt.compare(password, pemilik.password);
-  if (!isMatch) {
-    res.status(401).json({
-      success: false,
-      message: "username or password is incorrect",
-    });
-    return;
-  }
-
-  const token = generateToken(pemilik);
-  res.status(200).json({
-    success: true,
-    data: {
-      role: "pemilik",
-      user: {
-        username: pemilik.username,
-        alamat: pemilik.alamat,
-        no_telp: pemilik.no_telp,
+    const pemilik = await prisma.pemilik.findFirst({
+      where: {
+        username: username,
       },
+    });
 
-      token,
-      expiresIn: "10800",
-    },
-  });
+    if (!pemilik) {
+      return res.status(401).json({
+        success: false,
+        message: "username or password is incorrect",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, pemilik.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "username or password is incorrect",
+      });
+    }
+
+    const token = generateToken(pemilik);
+    return res.status(200).json({
+      success: true,
+      data: {
+        role: "pemilik",
+        user: {
+          username: pemilik.username,
+          alamat: pemilik.alamat,
+          no_telp: pemilik.no_telp,
+        },
+        token,
+        expiresIn: "10800",
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred during login",
+    });
+  }
 };
 
 export default { PemilikRegister, PemilikLogin };
