@@ -86,6 +86,7 @@ export const authenticateToken = async (req, res, next) => {
         .json({ success: false, message: "Invalid user role" });
     }
 
+    // let role = decoded.role;
     req.user = user;
     next();
   });
@@ -120,7 +121,7 @@ Pemilik
 */
 export const isOwner = (req, res, next) => {
   const user = req.user; // Mengakses req.tableName untuk mendapatkan nama tabel pengguna
-  if (user !== "pemilik") {
+  if (user.jabatan_pemilik !== "pemilik") {
     return res
       .status(401)
       .json({ success: false, message: "Pemilik Access Only" });

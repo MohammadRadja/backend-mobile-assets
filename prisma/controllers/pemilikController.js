@@ -32,6 +32,7 @@ const PemilikRegister = async (req, res) => {
       data: {
         username,
         password: hash,
+        jabatan,
         alamat,
         no_telp,
       },
@@ -93,6 +94,7 @@ const PemilikLogin = async (req, res) => {
         role: "pemilik",
         user: {
           username: pemilik.username,
+          jabatan: pemilik.jabatan,
           alamat: pemilik.alamat,
           no_telp: pemilik.no_telp,
         },

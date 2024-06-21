@@ -33,6 +33,7 @@ const AdminRegister = async (req, res) => {
         nama,
         username,
         password: hash,
+        jabatan,
       },
     });
 
@@ -41,6 +42,7 @@ const AdminRegister = async (req, res) => {
       data: {
         nama: user.nama,
         username: user.username,
+        jabatan: user.jabatan,
       },
     });
   } catch (error) {
@@ -92,6 +94,7 @@ const AdminLogin = async (req, res) => {
         user: {
           nama: admin.nama,
           username: admin.username,
+          jabatan: admin.jabatan,
         },
         token,
         expiresIn: "10800",

@@ -4,6 +4,7 @@ CREATE TABLE `Admin` (
     `username` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `nama` VARCHAR(191) NOT NULL,
+    `jabatan` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `Admin_username_key`(`username`),
@@ -27,6 +28,7 @@ CREATE TABLE `Pemilik` (
     `id_pemilik` INTEGER NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
+    `jabatan` VARCHAR(191) NOT NULL,
     `alamat` VARCHAR(191) NOT NULL,
     `no_telp` VARCHAR(191) NOT NULL,
 
