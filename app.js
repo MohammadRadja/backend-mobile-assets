@@ -18,7 +18,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware CORS
 const corsOptions = {
-  origin: "http://localhost:61591 ", // Ganti dengan asal frontend Anda
+  origin: "http://localhost:49572 ", // Ganti dengan asal frontend Anda
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
