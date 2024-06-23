@@ -4,9 +4,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const AdminRegister = async (req, res) => {
-  const { nama, username, password } = req.body;
+  const { nama, username, password, jabatan } = req.body;
 
-  if (!nama || !username || !password) {
+  if (!nama || !username || !password || !jabatan) {
     return res.status(400).json({
       success: false,
       message: "Name, username, and password are required",

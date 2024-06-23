@@ -9,7 +9,6 @@ export const generateToken = (user) => {
   let userId;
   let username;
   let role;
-
   if (user.id_admin) {
     userId = user.id_admin;
     username = user.username;
@@ -51,7 +50,7 @@ export const authenticateToken = async (req, res, next) => {
       console.log(err);
       return res.status(403).json({ success: false, message: "Token invalid" });
     }
-
+    console.log("Received token:", plainToken);
     console.log("Decoded JWT:", decoded);
 
     let user;
@@ -84,48 +83,85 @@ export const authenticateToken = async (req, res, next) => {
         .json({ success: false, message: "Invalid user role" });
     }
 
-    req.user = { ...user, role };
+    req.user = { ...user, role: decoded.role };
     console.log("Authenticated user:", req.user);
     next();
   });
 };
-
 /* 
 Admin
 */
 export const isAdmin = (req, res, next) => {
   const user = req.user;
-  console.log("User role in isAdmin:", user.role); // Logging role
-  if (user.role !== "admin") {
+
+  // Pastikan req.user dan req.user.role tidak undefined atau null
+  if (!user || !user.role) {
     return res
-      .status(401)
-      .json({ success: false, message: "Admin Access Only" });
+      .status(403)
+      .json({ message: "Forbidden: Admin access required" });
   }
+
+  console.log("User role in isAdmin:", user.role); // Logging role
+
+  if (user.role !== "admin") {
+    return res.status(401).json({
+      success: false,
+      message: "Admin Access Only. User is not authorized as admin.",
+    });
+  }
+
+  // Jika semua validasi berhasil, lanjutkan ke middleware atau handler berikutnya
   next();
 };
+
 /* 
 Pegawai
 */
 export const isEmployee = (req, res, next) => {
   const user = req.user;
-  console.log("User role in isEmployee:", user.role); // Logging role
-  if (user.role !== "pegawai") {
+
+  // Pastikan req.user dan req.user.role tidak undefined atau null
+  if (!user || !user.role) {
     return res
-      .status(401)
-      .json({ success: false, message: "Pegawai Access Only" });
+      .status(403)
+      .json({ message: "Forbidden: Admin access required" });
   }
+
+  console.log("User role in isEmployee:", user.role); // Logging role
+
+  if (user.role !== "pegawai") {
+    return res.status(401).json({
+      success: false,
+      message: "Pegawai Access Only. User is not authorized as Pegawai.",
+    });
+  }
+
+  // Jika semua validasi berhasil, lanjutkan ke middleware atau handler berikutnya
   next();
 };
+
 /* 
 Pemilik
 */
 export const isOwner = (req, res, next) => {
   const user = req.user;
-  console.log("User role in isOwner:", user.role); // Logging role
-  if (user.role !== "pemilik") {
+
+  // Pastikan req.user dan req.user.role tidak undefined atau null
+  if (!user || !user.role) {
     return res
-      .status(401)
-      .json({ success: false, message: "Pemilik Access Only" });
+      .status(403)
+      .json({ message: "Forbidden: Admin access required" });
   }
+
+  console.log("User role in isOwner:", user.role); // Logging role
+
+  if (user.role !== "pemilik") {
+    return res.status(401).json({
+      success: false,
+      message: "Pemilik Access Only. User is not authorized as Pemilik.",
+    });
+  }
+
+  // Jika semua validasi berhasil, lanjutkan ke middleware atau handler berikutnya
   next();
 };

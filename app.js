@@ -18,7 +18,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware CORS
 const corsOptions = {
-  origin: "http://localhost:49572 ", // Ganti dengan asal frontend Anda
+  origin: "http://localhost:51673 ", // Ganti dengan asal frontend Anda
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
@@ -39,13 +39,11 @@ app.use("/", resepRoute);
 app.use("/", doctorRoute);
 app.use("/", appointmentRoute);
 
-!~(
-  // Middleware logging
-  app.use((req, res, next) => {
-    console.log(`Request URL: ${req.url}`);
-    next();
-  })
-);
+// Middleware logging
+app.use((req, res, next) => {
+  console.log(`Request URL: ${req.url}`);
+  next();
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

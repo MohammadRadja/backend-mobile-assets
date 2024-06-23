@@ -31,7 +31,7 @@ router.put(
   isAdmin,
   hewanController.adminCRUDHewan
 );
-//DELETE _
+// DELETE
 router.delete(
   "/admin/hewan/:id",
   authenticateToken,
@@ -39,29 +39,29 @@ router.delete(
   hewanController.adminCRUDHewan
 );
 
-// Routes untuk Pegawai
-//POST -> CREATE
+/* Routes untuk Pegawai */
+// POST -> CREATE
 router.post(
   "/pegawai/hewan",
   authenticateToken,
   isEmployee,
   hewanController.pegawaiCRUDHewan
 );
-//GET -> READ
+// GET - READ
 router.get(
   "/pegawai/hewan",
   authenticateToken,
   isEmployee,
   hewanController.pegawaiCRUDHewan
 );
-//PUT -> EDIT
+// PUT -> EDIT
 router.put(
   "/pegawai/hewan/:id",
   authenticateToken,
   isEmployee,
   hewanController.pegawaiCRUDHewan
 );
-//DELETE
+// DELETE
 router.delete(
   "/pegawai/hewan/:id",
   authenticateToken,
@@ -69,7 +69,8 @@ router.delete(
   hewanController.pegawaiCRUDHewan
 );
 
-// Routes untuk Pemilik
+/* Routes untuk Pemilik */
+// GET - READ
 router.get(
   "/pemilik/hewan",
   authenticateToken,
