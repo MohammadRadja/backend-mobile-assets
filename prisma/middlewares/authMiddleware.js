@@ -31,26 +31,23 @@ export const generateToken = (user) => {
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: 10800, // 3 hours
+      expiresIn: "3h", // 3 hours
     }
   );
 };
 
 export const authenticateToken = async (req, res, next) => {
-  const token = req.header("Authorization");
-  if (!token) {
+  const authHeader = req.header("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.error("Bearer token is required");
     return res
       .status(401)
       .json({ success: false, message: "Bearer token is required" });
   }
 
-  const plainToken = token.split(" ")[1];
-  jwt.verify(plainToken, process.env.JWT_SECRET, async (err, decoded) => {
-    if (err) {
-      console.log(err);
-      return res.status(403).json({ success: false, message: "Token invalid" });
-    }
-    console.log("Received token:", plainToken);
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Decoded JWT:", decoded);
 
     let user;
@@ -72,10 +69,8 @@ export const authenticateToken = async (req, res, next) => {
       role = "pemilik";
     }
 
-    console.log(`User found: ${JSON.stringify(user)}`);
-
     if (!user) {
-      console.log(
+      console.error(
         `No user found for role: ${decoded.role} with username: ${decoded.username}`
       );
       return res
@@ -86,7 +81,10 @@ export const authenticateToken = async (req, res, next) => {
     req.user = { ...user, role: decoded.role };
     console.log("Authenticated user:", req.user);
     next();
-  });
+  } catch (error) {
+    console.error("Error in token verification:", error);
+    return res.status(403).json({ success: false, message: "Token invalid" });
+  }
 };
 /* 
 Admin

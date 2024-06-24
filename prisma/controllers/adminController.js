@@ -37,6 +37,8 @@ const AdminRegister = async (req, res) => {
       },
     });
 
+    console.log(`Admin registered successfully: ${user.username}`);
+
     return res.status(201).json({
       success: true,
       data: {
@@ -46,6 +48,7 @@ const AdminRegister = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Error in admin registration:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -87,6 +90,9 @@ const AdminLogin = async (req, res) => {
     }
 
     const token = generateToken(admin);
+
+    console.log(`Admin logged in successfully: ${admin.username}`);
+
     return res.status(200).json({
       success: true,
       data: {
@@ -101,6 +107,7 @@ const AdminLogin = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Error in admin login:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
