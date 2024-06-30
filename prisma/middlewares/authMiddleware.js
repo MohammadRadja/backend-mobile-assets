@@ -122,7 +122,7 @@ export const isEmployee = (req, res, next) => {
   if (!user || !user.role) {
     return res
       .status(403)
-      .json({ message: "Forbidden: Admin access required" });
+      .json({ message: "Forbidden: Pegawai access required" });
   }
 
   console.log("User role in isEmployee:", user.role); // Logging role
@@ -148,7 +148,7 @@ export const isOwner = (req, res, next) => {
   if (!user || !user.role) {
     return res
       .status(403)
-      .json({ message: "Forbidden: Admin access required" });
+      .json({ message: "Forbidden: Pegawai access required" });
   }
 
   console.log("User role in isOwner:", user.role); // Logging role

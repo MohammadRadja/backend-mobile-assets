@@ -16,19 +16,21 @@ const hewanController = {
 
       // Destructure action dan data dari req.body
       const { action, data } = req.body;
-
+      console.log("Data diterima:", data); // Log data yang diterima
       let result;
       switch (action) {
         case "create":
           // Validasi input data
           if (
             !data.id_pemilik ||
+            data.id_pemilik === 0 ||
             !data.nama_hewan ||
             !data.jenis_hewan ||
             data.umur == null ||
             data.berat == null ||
             !data.jenis_kelamin
           ) {
+            console.log("Missing or invalid required fields", data); // Log untuk detail lebih lanjut
             return res
               .status(400)
               .json({ success: false, message: "Missing required fields" });
@@ -185,12 +187,14 @@ const hewanController = {
       }
 
       const { action } = req.body;
+      console.log("Received action:", action); // Log action
       let result;
       switch (action) {
         case "read":
           result = await prisma.hewan.findMany();
           break;
         default:
+          console.log("Invalid action:", action); // Log invalid action
           return res
             .status(400)
             .json({ success: false, message: "Invalid action" });
