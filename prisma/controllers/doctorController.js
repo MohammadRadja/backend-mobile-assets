@@ -8,6 +8,7 @@ const hewanController = {
     try {
       // Pastikan user memiliki peran admin
       const { user } = req;
+      console.log("User role:", user.role); // Tambahkan logging untuk peran pengguna
       if (user.role !== "admin") {
         return res
           .status(403)
