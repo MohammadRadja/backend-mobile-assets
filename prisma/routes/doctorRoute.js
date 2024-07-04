@@ -45,36 +45,36 @@ router.post(
   "/pegawai/doctor",
   authenticateToken,
   isEmployee,
-  doctorController.adminCRUDDokter
+  doctorController.pegawaiCRUDDokter
 );
 //GET -> READ
 router.get(
   "/pegawai/doctor",
   authenticateToken,
   isEmployee,
-  doctorController.adminCRUDDokter
+  doctorController.pegawaiCRUDDokter
 );
 //PUT -> UPDATE
 router.put(
   "/pegawai/doctor/:id",
   authenticateToken,
   isEmployee,
-  doctorController.adminCRUDDokter
+  doctorController.pegawaiCRUDDokter
 );
 //DELETE
 router.delete(
   "/pegawai/doctor/:id",
   authenticateToken,
   isEmployee,
-  doctorController.adminCRUDDokter
+  doctorController.pegawaiCRUDDokter
 );
 
 // Routes untuk Pemilik
-router.get(
+router.post(
   "/pemilik/doctor",
   authenticateToken,
   isOwner,
-  doctorController.adminCRUDDokter
+  doctorController.pemilikReadDokter
 );
 
 export default router;

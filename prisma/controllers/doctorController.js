@@ -7,15 +7,17 @@ const hewanController = {
   adminCRUDDokter: async (req, res) => {
     try {
       // Pastikan user memiliki peran admin
-      const { jabatan_admin } = req;
-      if (jabatan_admin !== "admin") {
+      const { user } = req;
+      if (user.role !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
 
       const { action, data } = req.body;
+      console.log("Data diterima:", data); // Log data yang diterima
       let result;
+
       switch (action) {
         case "create":
           // Proses pembuatan data baru
@@ -26,43 +28,50 @@ const hewanController = {
             },
           });
           break;
+
         case "read":
           result = await prisma.doctor.findMany();
           break;
+
         case "update":
           result = await prisma.doctor.update({
             where: { id_dokter: data.id_dokter },
-            data: { ...data },
+            data: { ...data }, // Sesuaikan dengan data yang diperlukan
           });
           break;
+
         case "delete":
-          result = await prisma.hewan.delete({
+          result = await prisma.doctor.delete({
             where: { id_dokter: data.id_dokter },
           });
           break;
+
         default:
           return res
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: action, data: result });
+
+      return res.status(200).json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
   },
 
   // Pegawai: CRUD semua tabel kecuali admin
-  pegawaiCRUDHewan: async (req, res) => {
+  pegawaiCRUDDokter: async (req, res) => {
     try {
-      const { jabatan_pegawai } = req;
-      if (jabatan_pegawai !== "pegawai") {
+      const { user } = req;
+      if (user.role !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
 
       const { action, data } = req.body;
+      console.log("Data diterima:", data); // Log data yang diterima
       let result;
+
       switch (action) {
         case "create":
           // Proses pembuatan data baru
@@ -73,15 +82,18 @@ const hewanController = {
             },
           });
           break;
+
         case "read":
           result = await prisma.doctor.findMany();
           break;
+
         case "update":
-          result = await prisma.hewan.update({
+          result = await prisma.doctor.update({
             where: { id_dokter: data.id_dokter },
             data: { ...data },
           });
           break;
+
         case "delete":
           result = await prisma.doctor.delete({
             where: { id_dokter: data.id_dokter },
@@ -99,29 +111,33 @@ const hewanController = {
   },
 
   // Pemilik: Hanya dapat melihat data
-  pemilikReadHewan: async (req, res) => {
+  pemilikReadDokter: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
-      const { jabatan_pemilik } = req;
-      if (jabatan_pemilik !== "pemilik") {
+      const { user } = req;
+      if (user.role !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
 
       const { action } = req.body;
+      console.log("Received action:", action); // Log action
       let result;
+
       switch (action) {
         case "read":
           result = await prisma.doctor.findMany();
           break;
+
         default:
           return res
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: action, data: result });
+      return res.status(200).json({ success: true, data: result });
     } catch (error) {
+      console.error("Error in pemiliReadDoctor:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },

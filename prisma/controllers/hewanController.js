@@ -18,6 +18,7 @@ const hewanController = {
       const { action, data } = req.body;
       console.log("Data diterima:", data); // Log data yang diterima
       let result;
+
       switch (action) {
         case "create":
           // Validasi input data
@@ -189,10 +190,12 @@ const hewanController = {
       const { action } = req.body;
       console.log("Received action:", action); // Log action
       let result;
+
       switch (action) {
         case "read":
           result = await prisma.hewan.findMany();
           break;
+
         default:
           console.log("Invalid action:", action); // Log invalid action
           return res
