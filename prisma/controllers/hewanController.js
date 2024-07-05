@@ -23,7 +23,7 @@ const hewanController = {
         case "create":
           // Validasi input data
           if (
-            !data.id_pemilik ||
+            !data.id_hewan ||
             data.id_pemilik === 0 ||
             !data.nama_hewan ||
             !data.jenis_hewan ||
@@ -135,8 +135,13 @@ const hewanController = {
           });
           break;
         case "read":
-          result = await prisma.hewan.findMany();
+          result = await prisma.hewan.findMany({
+            include: {
+              pemilik: true, // Assuming the relation name is 'pemilik'
+            },
+          });
           break;
+
         case "update":
           const {
             id_hewan: idHewanToUpdate,
@@ -157,7 +162,13 @@ const hewanController = {
             },
           };
 
-          result = await prisma.hewan.update(updatePayloadPegawai);
+          try {
+            result = await prisma.hewan.update(updatePayloadPegawai);
+            console.log("Update Hewan successful:", result);
+          } catch (error) {
+            console.error("Update Hewan failed:", error);
+            throw new Error("Failed to update Hewan");
+          }
           break;
         case "delete":
           result = await prisma.hewan.delete({
@@ -193,7 +204,11 @@ const hewanController = {
 
       switch (action) {
         case "read":
-          result = await prisma.hewan.findMany();
+          result = await prisma.hewan.findMany({
+            include: {
+              pemilik: true, // Assuming the relation name is 'pemilik'
+            },
+          });
           break;
 
         default:
