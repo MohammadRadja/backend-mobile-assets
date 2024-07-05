@@ -1,7 +1,7 @@
 import express from "express";
-import adminController from "../controllers/adminController.js";
-import pegawaiController from "../controllers/pegawaiController.js";
-import pemilikController from "../controllers/pemilikController.js";
+import adminController from "../controllers/authControllers/adminController.js";
+import pegawaiController from "../controllers/authControllers/pegawaiController.js";
+import pemilikController from "../controllers/authControllers/pemilikController.js";
 
 const router = express.Router();
 

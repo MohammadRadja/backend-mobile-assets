@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { generateToken } from "../middlewares/authMiddleware.js";
+import { generateToken } from "../../middlewares/authMiddleware.js";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
