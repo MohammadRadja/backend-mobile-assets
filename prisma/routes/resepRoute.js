@@ -11,10 +11,17 @@ import resepController from "../controllers/resepController.js";
 
 const router = express.Router();
 
-// Routes untuk Admin
+// Middleware untuk logging HTTP request
+const logRequest = (req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+  next();
+};
+
+/* Routes untuk Admin */
 // POST
 router.post(
   "/admin/resep",
+  logRequest,
   authenticateToken,
   isAdmin,
   resepController.adminCRUDResep
@@ -22,6 +29,7 @@ router.post(
 // GET
 router.get(
   "/admin/resep",
+  logRequest,
   authenticateToken,
   isAdmin,
   resepController.adminCRUDResep
@@ -29,12 +37,14 @@ router.get(
 // PUT
 router.put(
   "/admin/resep/:id",
+  logRequest,
   authenticateToken,
   isAdmin,
   resepController.adminCRUDResep
 );
 router.delete(
   "/admin/resep/:id",
+  logRequest,
   authenticateToken,
   isAdmin,
   resepController.adminCRUDResep
@@ -44,6 +54,7 @@ router.delete(
 // POST
 router.post(
   "/pegawai/resep",
+  logRequest,
   authenticateToken,
   isEmployee,
   resepController.pegawaiCRUDResep
@@ -51,6 +62,7 @@ router.post(
 // GET
 router.get(
   "/pegawai/resep",
+  logRequest,
   authenticateToken,
   isEmployee,
   resepController.pegawaiCRUDResep
@@ -58,6 +70,7 @@ router.get(
 // PUT
 router.put(
   "/pegawai/resep/:id",
+  logRequest,
   authenticateToken,
   isEmployee,
   resepController.pegawaiCRUDResep
@@ -65,6 +78,7 @@ router.put(
 // DELETE
 router.delete(
   "/pegawai/resep",
+  logRequest,
   authenticateToken,
   isEmployee,
   resepController.pegawaiCRUDResep
@@ -74,6 +88,7 @@ router.delete(
 // POST
 router.post(
   "/pemilik/resep",
+  logRequest,
   authenticateToken,
   isOwner,
   resepController.pemilikReadResep

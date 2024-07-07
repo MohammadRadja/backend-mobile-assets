@@ -50,7 +50,25 @@ const rekammedisController = {
           break;
 
         case "read":
-          result = await prisma.rekamMedis.findMany();
+          result = await prisma.rekamMedis.findMany({
+            // include: {
+            //   hewan: true,
+            //   pemilik: true,
+            //   pegawai: true,
+            //   obat: true,
+            // },
+            select: {
+              id_rekam_medis: true,
+              id_hewan: true,
+              id_pemilik: true,
+              id_pegawai: true,
+              id_obat: true,
+              keluhan: true,
+              diagnosa: true,
+              tgl_periksa: true,
+            },
+          });
+          console.log("Data Rekam Medis:", result);
           break;
 
         case "update":

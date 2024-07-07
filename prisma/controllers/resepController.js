@@ -25,6 +25,7 @@ const resepController = {
 
       switch (action) {
         case "create":
+          //Buat Data Baru
           result = await prisma.resep.create({
             data: {
               id_rekam_medis: data.id_rekam_medis,
@@ -47,6 +48,7 @@ const resepController = {
 
         case "update":
           console.log("Update operation");
+
           const {
             id_resep: idResepToUpdate,
             id_rekam_medis: idRekamMedisToUpdate,
@@ -54,6 +56,7 @@ const resepController = {
             ...updateDataResep
           } = data; // Extract ids and update data
 
+          // Prepare the update payload
           const updatePayloadResep = {
             where: { id_resep: idResepToUpdate },
             data: {
@@ -66,15 +69,25 @@ const resepController = {
               },
             },
             include: {
-              rekam_medis: true,
-              obat: true,
+              rekam_medis: {
+                select: {
+                  id_rekam_medis: true,
+                },
+              },
+              obat: {
+                select: {
+                  id_obat: true,
+                },
+              },
             },
           };
 
           try {
+            // Execute the update operation
             result = await prisma.resep.update(updatePayloadResep);
             console.log("Update Resep successful:", result);
           } catch (error) {
+            // Handle any errors during the update operation
             console.error("Update Resep failed:", error);
             throw new Error("Failed to update resep");
           }
@@ -133,9 +146,15 @@ const resepController = {
         case "read":
           console.log("Read operation");
           result = await prisma.resep.findMany({
-            include: {
-              rekam_medis: true,
-              obat: true,
+            // include: {
+            //   rekam_medis: true,
+            //   obat: true,
+            // },
+            select: {
+              id_resep: true,
+              id_rekam_medis: true,
+              id_obat: true,
+              jumlah_obat: true,
             },
           });
           console.log("Read Resep successful:", result);
@@ -189,7 +208,6 @@ const resepController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      console.log("Operation success:", action, result);
       return res.status(200).json({ success: action, data: result });
     } catch (error) {
       console.error("Operation failed:", error);
