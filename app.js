@@ -9,6 +9,8 @@ import resepRoute from "./prisma/routes/resepRoute.js";
 import authRoute from "./prisma/routes/authRoute.js";
 import doctorRoute from "./prisma/routes/doctorRoute.js";
 import appointmentRoute from "./prisma/routes/appointmentRoute.js";
+import dataPemilikRoute from "./prisma/routes/pemilikRoute.js";
+import dataPegawaiRoute from "./prisma/routes/pegawaiRoute.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -18,7 +20,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware CORS
 const corsOptions = {
-  origin: "http://localhost:51512 ", // Ganti dengan asal frontend Anda
+  origin: "http://localhost:54875 ", // Ganti dengan asal frontend Anda
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
@@ -38,6 +40,8 @@ app.use("/", resepRoute);
 app.use("/", resepRoute);
 app.use("/", doctorRoute);
 app.use("/", appointmentRoute);
+app.use("/", dataPemilikRoute);
+app.use("/", dataPegawaiRoute);
 
 // Middleware logging
 app.use((req, res, next) => {
