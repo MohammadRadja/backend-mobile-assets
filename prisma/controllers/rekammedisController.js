@@ -21,42 +21,27 @@ const rekammedisController = {
 
       switch (action) {
         case "create":
-          if (
-            !data.id_rekam_medis ||
-            data.id_hewan === 0 ||
-            data.id_pemilik === 0 ||
-            data.id_pegawai === 0 ||
-            data.id_obat === 0 ||
-            !data.keluhan ||
-            !data.diagnosa ||
-            !data.tgl_periksa
-          ) {
-            console.log("Missing or invalid required fields", data); // Log untuk detail lebih lanjut
+          // Validasi bahwa tgl_periksa ada dalam data yang diterima
+          if (!data.tgl_periksa) {
             return res
               .status(400)
-              .json({ success: false, message: "Missing required fields" });
+              .json({ success: false, message: "Missing tgl_periksa" });
           }
           result = await prisma.rekamMedis.create({
             data: {
-              id_hewan: data.id_hewan,
-              id_pemilik: data.id_pemilik,
-              id_pegawai: data.id_pegawai,
-              id_obat: data.id_obat,
+              id_hewan: parseInt(data.id_hewan, 10), // Konversi ke integer
+              id_pemilik: parseInt(data.id_pemilik, 10), // Konversi ke integer
+              id_pegawai: parseInt(data.id_pegawai, 10), // Konversi ke integer
+              id_obat: parseInt(data.id_obat, 10), // Konversi ke integer
               keluhan: data.keluhan,
               diagnosa: data.diagnosa,
-              tgl_periksa: data.tgl_periksa,
+              tgl_periksa: new Date(data.tgl_periksa), // Pastikan tgl_periksa adalah objek Date
             },
           });
           break;
 
         case "read":
           result = await prisma.rekamMedis.findMany({
-            // include: {
-            //   hewan: true,
-            //   pemilik: true,
-            //   pegawai: true,
-            //   obat: true,
-            // },
             select: {
               id_rekam_medis: true,
               id_hewan: true,
@@ -65,7 +50,7 @@ const rekammedisController = {
               id_obat: true,
               keluhan: true,
               diagnosa: true,
-              tgl_periksa: true,
+              tgl_periksa: true, // Sertakan tgl_periksa dalam hasil query
             },
           });
           console.log("Data Rekam Medis:", result);
@@ -74,7 +59,14 @@ const rekammedisController = {
         case "update":
           result = await prisma.rekamMedis.update({
             where: { id_rekam_medis: data.id_rekam_medis },
-            data: { ...data },
+            data: {
+              ...data,
+              id_hewan: parseInt(data.id_hewan, 10),
+              id_pemilik: parseInt(data.id_pemilik, 10),
+              id_pegawai: parseInt(data.id_pegawai, 10),
+              id_obat: parseInt(data.id_obat, 10),
+              tgl_periksa: new Date(data.tgl_periksa),
+            },
           });
           break;
 
@@ -88,7 +80,7 @@ const rekammedisController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: action, data: result });
+      return res.status(200).json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -109,11 +101,21 @@ const rekammedisController = {
       let result;
       switch (action) {
         case "create":
+          // Validasi bahwa tgl_periksa ada dalam data yang diterima
+          if (!data.tgl_periksa) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Missing tgl_periksa" });
+          }
           result = await prisma.rekamMedis.create({
             data: {
+              id_hewan: parseInt(data.id_hewan, 10), // Konversi ke integer
+              id_pemilik: parseInt(data.id_pemilik, 10), // Konversi ke integer
+              id_pegawai: parseInt(data.id_pegawai, 10), // Konversi ke integer
+              id_obat: parseInt(data.id_obat, 10), // Konversi ke integer
               keluhan: data.keluhan,
               diagnosa: data.diagnosa,
-              tgl_periksa: data.tgl_periksa,
+              tgl_periksa: new Date(data.tgl_periksa), // Pastikan tgl_periksa adalah objek Date
             },
           });
           break;
@@ -125,7 +127,14 @@ const rekammedisController = {
         case "update":
           result = await prisma.rekamMedis.update({
             where: { id_rekam_medis: data.id_rekam_medis },
-            data: { ...data },
+            data: {
+              ...data,
+              id_hewan: parseInt(data.id_hewan, 10),
+              id_pemilik: parseInt(data.id_pemilik, 10),
+              id_pegawai: parseInt(data.id_pegawai, 10),
+              id_obat: parseInt(data.id_obat, 10),
+              tgl_periksa: new Date(data.tgl_periksa),
+            },
           });
           break;
 
@@ -139,7 +148,7 @@ const rekammedisController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: action, data: result });
+      return res.status(200).json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
@@ -168,7 +177,7 @@ const rekammedisController = {
             .status(400)
             .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: action, data: result });
+      return res.status(200).json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
     }
