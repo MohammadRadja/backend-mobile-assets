@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 const dataPemilikController = {
@@ -20,9 +20,23 @@ const dataPemilikController = {
 
       switch (action) {
         case "create":
+          const existUsername = await prisma.pemilik.findFirst({
+            where: {
+              username: username,
+            },
+          });
+          if (existUsername) {
+            res.status(400).json({
+              success: false,
+              message: "Username Pemilik already exist",
+            });
+            return;
+          }
+          const hash = await bcrypt.hash(password, 10);
           result = await prisma.pemilik.create({
             data: {
               username: data.username,
+              password: hash,
               alamat: data.alamat,
               no_telp: data.no_telp,
             },
@@ -74,9 +88,23 @@ const dataPemilikController = {
 
       switch (action) {
         case "create":
+          const existUsername = await prisma.pemilik.findFirst({
+            where: {
+              username: username,
+            },
+          });
+          if (existUsername) {
+            res.status(400).json({
+              success: false,
+              message: "Username Pemilik already exist",
+            });
+            return;
+          }
+          const hash = await bcrypt.hash(password, 10);
           result = await prisma.pemilik.create({
             data: {
               username: data.username,
+              password: hash,
               alamat: data.alamat,
               no_telp: data.no_telp,
             },
@@ -127,15 +155,15 @@ const dataPemilikController = {
       let result;
 
       switch (action) {
-        case "create":
-          result = await prisma.pemilik.create({
-            data: {
-              username: data.username,
-              alamat: data.alamat,
-              no_telp: data.no_telp,
-            },
-          });
-          break;
+        // case "create":
+        //   result = await prisma.pemilik.create({
+        //     data: {
+        //       username: data.username,
+        //       alamat: data.alamat,
+        //       no_telp: data.no_telp,
+        //     },
+        //   });
+        //   break;
 
         case "read":
           result = await prisma.pemilik.findMany();

@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
+import bcrypt from "bcryptjs";
 const dataPegawaiController = {
   adminCRUDDataPegawai: async (req, res) => {
     try {
@@ -20,9 +20,23 @@ const dataPegawaiController = {
 
       switch (action) {
         case "create":
+          const existUsername = await prisma.pegawai.findFirst({
+            where: {
+              username: username,
+            },
+          });
+          if (existUsername) {
+            res.status(400).json({
+              success: false,
+              message: "Username Pegawai already exist",
+            });
+            return;
+          }
+          const hash = await bcrypt.hash(password, 10);
           result = await prisma.pegawai.create({
             data: {
               username: data.username,
+              password: hash,
               jabatan: data.jabatan,
               alamat: data.alamat,
               no_telp: data.no_telp,
@@ -74,16 +88,16 @@ const dataPegawaiController = {
       let result;
 
       switch (action) {
-        case "create":
-          result = await prisma.pegawai.create({
-            data: {
-              username: data.username,
-              jabatan: data.jabatan,
-              alamat: data.alamat,
-              no_telp: data.no_telp,
-            },
-          });
-          break;
+        // case "create":
+        //   result = await prisma.pegawai.create({
+        //     data: {
+        //       username: data.username,
+        //       jabatan: data.jabatan,
+        //       alamat: data.alamat,
+        //       no_telp: data.no_telp,
+        //     },
+        //   });
+        //   break;
 
         case "read":
           result = await prisma.pegawai.findMany();
