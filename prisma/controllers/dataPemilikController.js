@@ -37,6 +37,7 @@ const dataPemilikController = {
             data: {
               username: data.username,
               password: hash,
+              jabatan: data.jabatan,
               alamat: data.alamat,
               no_telp: data.no_telp,
             },
@@ -105,6 +106,7 @@ const dataPemilikController = {
             data: {
               username: data.username,
               password: hash,
+              jabatan: data.jabatan,
               alamat: data.alamat,
               no_telp: data.no_telp,
             },
