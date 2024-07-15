@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const rekammedisController = {
-  // Admin: CRUD semua tabel
   adminCRUDRekamMedis: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
@@ -19,14 +18,15 @@ const rekammedisController = {
       console.log("Data diterima:", data);
       let result;
 
+      // Function to parse DD-MM-YYYY date to ISO-8601 format
+      const parseDate = (dateStr) => {
+        const [day, month, year] = dateStr.split("-");
+        return new Date(`${year}-${month}-${day}`);
+      };
+
       switch (action) {
         case "create":
           // Validasi bahwa tgl_periksa ada dalam data yang diterima
-          if (!data.tgl_periksa) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Missing tgl_periksa" });
-          }
           result = await prisma.rekamMedis.create({
             data: {
               id_hewan: parseInt(data.id_hewan, 10), // Konversi ke integer
@@ -35,7 +35,7 @@ const rekammedisController = {
               id_obat: parseInt(data.id_obat, 10), // Konversi ke integer
               keluhan: data.keluhan,
               diagnosa: data.diagnosa,
-              tgl_periksa: new Date(data.tgl_periksa), // Pastikan tgl_periksa adalah objek Date
+              tgl_periksa: parseDate(data.tgl_periksa), // Konversi tgl_periksa
             },
           });
           break;
@@ -65,7 +65,7 @@ const rekammedisController = {
               id_pemilik: parseInt(data.id_pemilik, 10),
               id_pegawai: parseInt(data.id_pegawai, 10),
               id_obat: parseInt(data.id_obat, 10),
-              tgl_periksa: new Date(data.tgl_periksa),
+              tgl_periksa: parseDate(data.tgl_periksa), // Konversi tgl_periksa
             },
           });
           break;
@@ -86,7 +86,6 @@ const rekammedisController = {
     }
   },
 
-  // Pegawai: CRUD semua tabel kecuali admin
   pegawaiCRUDRekamMedis: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
@@ -99,9 +98,14 @@ const rekammedisController = {
 
       const { action, data } = req.body;
       let result;
+
+      const parseDate = (dateStr) => {
+        const [day, month, year] = dateStr.split("-");
+        return new Date(`${year}-${month}-${day}`);
+      };
+
       switch (action) {
         case "create":
-          // Validasi bahwa tgl_periksa ada dalam data yang diterima
           if (!data.tgl_periksa) {
             return res
               .status(400)
@@ -115,7 +119,7 @@ const rekammedisController = {
               id_obat: parseInt(data.id_obat, 10), // Konversi ke integer
               keluhan: data.keluhan,
               diagnosa: data.diagnosa,
-              tgl_periksa: new Date(data.tgl_periksa), // Pastikan tgl_periksa adalah objek Date
+              tgl_periksa: parseDate(data.tgl_periksa), // Konversi tgl_periksa
             },
           });
           break;
@@ -133,7 +137,7 @@ const rekammedisController = {
               id_pemilik: parseInt(data.id_pemilik, 10),
               id_pegawai: parseInt(data.id_pegawai, 10),
               id_obat: parseInt(data.id_obat, 10),
-              tgl_periksa: new Date(data.tgl_periksa),
+              tgl_periksa: parseDate(data.tgl_periksa), // Konversi tgl_periksa
             },
           });
           break;
@@ -154,7 +158,6 @@ const rekammedisController = {
     }
   },
 
-  // Pemilik: Hanya dapat melihat data
   pemilikReadRekamMedis: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
