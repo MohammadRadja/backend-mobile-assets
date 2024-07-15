@@ -23,8 +23,7 @@ const hewanController = {
         case "create":
           // Validasi input data
           if (
-            !data.id_hewan ||
-            data.id_pemilik === 0 ||
+            !data.id_pemilik ||
             !data.nama_hewan ||
             !data.jenis_hewan ||
             data.umur == null ||
