@@ -22,7 +22,7 @@ const dataPegawaiController = {
         case "create":
           const existUsername = await prisma.pegawai.findFirst({
             where: {
-              username: username,
+              username: data.username,
             },
           });
           if (existUsername) {
@@ -32,7 +32,7 @@ const dataPegawaiController = {
             });
             return;
           }
-          const hash = await bcrypt.hash(password, 10);
+          const hash = await bcrypt.hash(data.password, 10);
           result = await prisma.pegawai.create({
             data: {
               username: data.username,

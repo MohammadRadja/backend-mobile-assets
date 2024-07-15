@@ -22,7 +22,7 @@ const dataPemilikController = {
         case "create":
           const existUsername = await prisma.pemilik.findFirst({
             where: {
-              username: username,
+              username: data.username,
             },
           });
           if (existUsername) {
@@ -32,7 +32,7 @@ const dataPemilikController = {
             });
             return;
           }
-          const hash = await bcrypt.hash(password, 10);
+          const hash = await bcrypt.hash(data.password, 10);
           result = await prisma.pemilik.create({
             data: {
               username: data.username,
@@ -91,7 +91,7 @@ const dataPemilikController = {
         case "create":
           const existUsername = await prisma.pemilik.findFirst({
             where: {
-              username: username,
+              username: data.username,
             },
           });
           if (existUsername) {
@@ -101,7 +101,7 @@ const dataPemilikController = {
             });
             return;
           }
-          const hash = await bcrypt.hash(password, 10);
+          const hash = await bcrypt.hash(data.password, 10);
           result = await prisma.pemilik.create({
             data: {
               username: data.username,
