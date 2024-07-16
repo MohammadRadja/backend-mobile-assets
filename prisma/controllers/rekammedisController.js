@@ -45,12 +45,33 @@ const rekammedisController = {
             select: {
               id_rekam_medis: true,
               id_hewan: true,
+              hewan: {
+                select: {
+                  nama_hewan: true,
+                },
+              },
               id_pemilik: true,
+              pemilik: {
+                select: {
+                  username: true,
+                }
+              },
               id_pegawai: true,
+              pegawai: {
+                select: {
+                  username: true,
+                }
+              },
               id_obat: true,
+              obat: {
+                select: {
+                  nama_obat: true,
+                }
+              },
               keluhan: true,
               diagnosa: true,
-              tgl_periksa: true, // Sertakan tgl_periksa dalam hasil query
+              tgl_periksa: true,
+               // Sertakan tgl_periksa dalam hasil query
             },
           });
           console.log("Data Rekam Medis:", result);
@@ -65,6 +86,8 @@ const rekammedisController = {
               id_pemilik: parseInt(data.id_pemilik, 10),
               id_pegawai: parseInt(data.id_pegawai, 10),
               id_obat: parseInt(data.id_obat, 10),
+              keluhan: data.keluhan,
+              diagnosa: data.diagnosa,
               tgl_periksa: parseDate(data.tgl_periksa), // Konversi tgl_periksa
             },
           });
