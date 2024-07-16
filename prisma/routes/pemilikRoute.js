@@ -74,14 +74,14 @@ router.delete(
 router.post(
   "/pemilik/pemilik/:id",
   authenticateToken,
-  isEmployee,
+  isOwner,
   dataPemilikController.pemilikCRUDDataPemilik
 );
 //PUT -> UPDATE
 router.put(
   "/pemilik/pemilik/:id",
   authenticateToken,
-  isEmployee,
+  isOwner,
   dataPemilikController.pemilikCRUDDataPemilik
 );
 

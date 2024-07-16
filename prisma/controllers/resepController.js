@@ -25,14 +25,30 @@ const resepController = {
 
       switch (action) {
         case "create":
-          //Buat Data Baru
-          result = await prisma.resep.create({
-            data: {
-              id_rekam_medis: data.id_rekam_medis,
-              id_obat: data.id_obat,
-              jumlah_obat: data.jumlah_obat,
-            },
-          });
+          try {
+            // Buat Data Baru
+            result = await prisma.resep.create({
+              data: {
+                id_rekam_medis: data.id_rekam_medis,
+                id_obat: data.id_obat,
+                jumlah_obat: data.jumlah_obat,
+              },
+            });
+          } catch (error) {
+            if (error.code === "P2002") {
+              // Prisma error code for unique constraint violation
+              return res
+                .status(400)
+                .json({
+                  success: false,
+                  message: "Resep dengan id_rekam_medis ini sudah ada.",
+                });
+            }
+            console.error("Create Resep failed:", error);
+            return res
+              .status(500)
+              .json({ success: false, message: error.message });
+          }
           break;
 
         case "read":
@@ -53,32 +69,20 @@ const resepController = {
             id_resep: idResepToUpdate,
             id_rekam_medis: idRekamMedisToUpdate,
             id_obat: idObatToUpdate,
-            ...updateDataResep
+            jumlah_obat,
           } = data; // Extract ids and update data
 
-          // Prepare the update payload
+          // Prepare the // Prepare the update payload
           const updatePayloadResep = {
             where: { id_resep: idResepToUpdate },
             data: {
-              ...updateDataResep,
-              rekam_medis: {
-                connect: { id_rekam_medis: idRekamMedisToUpdate },
-              },
-              obat: {
-                connect: { id_obat: idObatToUpdate },
-              },
+              id_rekam_medis: idRekamMedisToUpdate,
+              id_obat: idObatToUpdate,
+              jumlah_obat: jumlah_obat,
             },
             include: {
-              rekam_medis: {
-                select: {
-                  id_rekam_medis: true,
-                },
-              },
-              obat: {
-                select: {
-                  id_obat: true,
-                },
-              },
+              rekam_medis: true,
+              obat: true,
             },
           };
 

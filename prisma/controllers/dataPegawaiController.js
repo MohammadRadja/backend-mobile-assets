@@ -92,7 +92,8 @@ const dataPegawaiController = {
       }
 
       const { action, data } = req.body;
-
+      console.log("Action:", action);
+      console.log("Data diterima:", data);
       let result;
 
       switch (action) {

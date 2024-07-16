@@ -151,6 +151,14 @@ const dataPemilikController = {
           .json({ success: false, message: "Unauthorized access" });
       }
 
+      const idPegawai = parseInt(req.params.id, 10); // Konversi ke integer
+      if (isNaN(idPegawai)) {
+        console.log("Invalid id_pegawai provided:", req.params.id);
+        return res
+          .status(400)
+          .json({ success: false, message: "ID pegawai tidak valid." });
+      }
+
       const { action, data } = req.body;
       console.log("Action:", action); // Log data yang diterima
       console.log("Data diterima:", data); //
@@ -161,13 +169,36 @@ const dataPemilikController = {
           result = await prisma.pemilik.findMany({
             where: { id_pemilik: data.id_pemilik },
           });
+          if (!result) {
+            console.log("Pemilik not found for ID:", idPegawai);
+            return res
+              .status(404)
+              .json({ success: false, message: "Pemilik not found." });
+          }
           break;
 
         case "update":
+          console.log("Updating data for pemilik ID:", idPegawai);
+          if (!data) {
+            console.log("Missing data in request body:", data);
+            return res
+              .status(400)
+              .json({ success: false, message: "Data pemilik tidak lengkap." });
+          }
+
+          // Hapus id_pegawai dari data yang akan diupdate
+          const { id_pemilik, password, ...updateData } = data;
+
+          // Hash password jika ada
+          if (password) {
+            updateData.password = await bcrypt.hash(password, 10);
+          }
+
           result = await prisma.pemilik.update({
-            where: { id_pemilik: data.id_pemilik },
-            data: { ...data },
+            where: { id_pemilik: idPegawai }, // Gunakan id dari parameter URL
+            data: { ...updateData }, // Kirim data tanpa id_pegawai
           });
+          console.log("Update successful:", result);
           break;
         default:
           return res

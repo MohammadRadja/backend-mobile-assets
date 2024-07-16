@@ -66,7 +66,7 @@ CREATE TABLE `RekamMedis` (
     `id_obat` INTEGER NOT NULL,
     `keluhan` VARCHAR(191) NOT NULL,
     `diagnosa` VARCHAR(191) NOT NULL,
-    `tgl_periksa` DATETIME(3) NOT NULL,
+    `tgl_periksa` DATE NOT NULL,
 
     PRIMARY KEY (`id_rekam_medis`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -89,7 +89,6 @@ CREATE TABLE `Resep` (
     `id_obat` INTEGER NOT NULL,
     `jumlah_obat` INTEGER NOT NULL,
 
-    UNIQUE INDEX `Resep_id_rekam_medis_key`(`id_rekam_medis`),
     PRIMARY KEY (`id_resep`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
