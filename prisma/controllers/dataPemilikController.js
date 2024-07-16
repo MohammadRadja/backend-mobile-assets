@@ -157,16 +157,6 @@ const dataPemilikController = {
       let result;
 
       switch (action) {
-        // case "create":
-        //   result = await prisma.pemilik.create({
-        //     data: {
-        //       username: data.username,
-        //       alamat: data.alamat,
-        //       no_telp: data.no_telp,
-        //     },
-        //   });
-        //   break;
-
         case "read":
           result = await prisma.pemilik.findMany({
             where: { id_pemilik: data.id_pemilik },
@@ -179,12 +169,6 @@ const dataPemilikController = {
             data: { ...data },
           });
           break;
-
-        // case "delete":
-        //   result = await prisma.pemilik.delete({
-        //     where: { id_pemilik: data.id_pemilik },
-        //   });
-        //   break;
         default:
           return res
             .status(400)

@@ -70,16 +70,9 @@ router.delete(
 );
 
 // Routes untuk Pemilik
-//POST -> CREATE
-router.post(
-  "/pemilik/pemilik",
-  authenticateToken,
-  isEmployee,
-  dataPemilikController.pemilikCRUDDataPemilik
-);
 //GET -> READ
-router.get(
-  "/pemilik/pemilik",
+router.post(
+  "/pemilik/pemilik/:id",
   authenticateToken,
   isEmployee,
   dataPemilikController.pemilikCRUDDataPemilik
