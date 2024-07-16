@@ -168,7 +168,9 @@ const dataPemilikController = {
         //   break;
 
         case "read":
-          result = await prisma.pemilik.findMany();
+          result = await prisma.pemilik.findMany({
+            where: { id_pemilik: data.id_pemilik },
+          });
           break;
 
         case "update":

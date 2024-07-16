@@ -39,33 +39,19 @@ router.delete(
 );
 
 // Routes untuk Pegawai
-//POST -> CREATE
-router.post(
-  "/pegawai/pegawai",
-  authenticateToken,
-  isEmployee,
-  dataPegawaiController.adminCRUDDataPegawai
-);
 //GET -> READ
-router.get(
-  "/pegawai/pegawai",
+router.post(
+  "/pegawai/pegawai/:id",
   authenticateToken,
   isEmployee,
-  dataPegawaiController.adminCRUDDataPegawai
+  dataPegawaiController.pegawaiCRUDDataPegawai
 );
 //PUT -> UPDATE
 router.put(
   "/pegawai/pegawai/:id",
   authenticateToken,
   isEmployee,
-  dataPegawaiController.adminCRUDDataPegawai
+  dataPegawaiController.pegawaiCRUDDataPegawai
 );
-//DELETE
-// router.delete(
-//   "/pegawai/pegawai/:id",
-//   authenticateToken,
-//   isEmployee,
-//   dataPegawaiController.adminCRUDDataPegawai
-// );
 
 export default router;
