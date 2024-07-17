@@ -6,11 +6,9 @@ import pemilikController from "../controllers/authControllers/pemilikController.
 const router = express.Router();
 
 // Routes untuk admin
-router.post("/admin/register", adminController.AdminRegister);
 router.post("/admin/login", adminController.AdminLogin);
 
 // Routes untuk pegawai
-router.post("/pegawai/register", pegawaiController.PegawaiRegister);
 router.post("/pegawai/login", pegawaiController.PegawaiLogin);
 
 // Routes untuk pemilik

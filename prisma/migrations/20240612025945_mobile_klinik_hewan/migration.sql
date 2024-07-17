@@ -77,10 +77,12 @@ CREATE TABLE `Pembayaran` (
     `id_rekam_medis` INTEGER NOT NULL,
     `tgl_pembayaran` DATETIME(3) NOT NULL,
     `jumlah_pembayaran` DOUBLE NOT NULL,
+    `bukti_pembayaran` VARCHAR(255) NOT NULL,
 
-    UNIQUE INDEX `Pembayaran_id_rekam_medis_key`(`id_rekam_medis`),
     PRIMARY KEY (`id_pembayaran`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_rekam_medis_fkey` FOREIGN KEY (`id_rekam_medis`) REFERENCES `RekamMedis`(`id_rekam_medis`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- CreateTable
 CREATE TABLE `Resep` (
@@ -126,9 +128,6 @@ ALTER TABLE `RekamMedis` ADD CONSTRAINT `RekamMedis_id_pegawai_fkey` FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE `RekamMedis` ADD CONSTRAINT `RekamMedis_id_obat_fkey` FOREIGN KEY (`id_obat`) REFERENCES `Obat`(`id_obat`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_rekam_medis_fkey` FOREIGN KEY (`id_rekam_medis`) REFERENCES `RekamMedis`(`id_rekam_medis`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Resep` ADD CONSTRAINT `Resep_id_rekam_medis_fkey` FOREIGN KEY (`id_rekam_medis`) REFERENCES `RekamMedis`(`id_rekam_medis`) ON DELETE RESTRICT ON UPDATE CASCADE;

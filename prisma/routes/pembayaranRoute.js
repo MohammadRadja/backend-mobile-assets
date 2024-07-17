@@ -45,32 +45,32 @@ router.post(
   "/pegawai/pembayaran",
   authenticateToken,
   isEmployee,
-  pembayaranController.adminCRUDPembayaran
+  pembayaranController.pegawaiCRUDPembayaran
 );
 //GET -> READ
 router.get(
   "/pegawai/pembayaran",
   authenticateToken,
   isEmployee,
-  pembayaranController.adminCRUDPembayaran
+  pembayaranController.pegawaiCRUDPembayaran
 );
 //PUT -> UPDATE
 router.put(
   "/pegawai/pembayaran/:id",
   authenticateToken,
   isEmployee,
-  pembayaranController.adminCRUDPembayaran
+  pembayaranController.pegawaiCRUDPembayaran
 );
 //DELETE
 router.delete(
   "/pegawai/pembayaran/:id",
   authenticateToken,
   isEmployee,
-  pembayaranController.adminCRUDPembayaran
+  pembayaranController.pegawaiCRUDPembayaran
 );
 
 /* Routes untuk Pemilik */
-router.get(
+router.post(
   "/pemilik/pembayaran",
   authenticateToken,
   isOwner,

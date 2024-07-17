@@ -3,60 +3,6 @@ import { generateToken } from "../../middlewares/authMiddleware.js";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-const AdminRegister = async (req, res) => {
-  const { nama, username, password, jabatan } = req.body;
-
-  if (!nama || !username || !password || !jabatan) {
-    return res.status(400).json({
-      success: false,
-      message: "Name, username, and password are required",
-    });
-  }
-
-  try {
-    const existUsername = await prisma.admin.findFirst({
-      where: {
-        username,
-      },
-    });
-
-    if (existUsername) {
-      return res.status(400).json({
-        success: false,
-        message: "Username already exists",
-      });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-    const user = await prisma.admin.create({
-      data: {
-        nama,
-        username,
-        password: hash,
-        jabatan,
-      },
-    });
-
-    console.log(`Admin registered successfully: ${user.username}`);
-
-    return res.status(201).json({
-      success: true,
-      data: {
-        nama: user.nama,
-        username: user.username,
-        jabatan: user.jabatan,
-      },
-    });
-  } catch (error) {
-    console.error("Error in admin registration:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message,
-    });
-  }
-};
-
 const AdminLogin = async (req, res) => {
   const { username, password } = req.body;
 
@@ -116,4 +62,4 @@ const AdminLogin = async (req, res) => {
   }
 };
 
-export default { AdminRegister, AdminLogin };
+export default { AdminLogin };

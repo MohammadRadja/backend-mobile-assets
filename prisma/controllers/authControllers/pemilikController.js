@@ -10,7 +10,7 @@ const PemilikRegister = async (req, res) => {
   if (!username || !password || !jabatan || !alamat || !no_telp) {
     res.status(400).json({
       success: false,
-      message: "username, password, alamat and no_telp are required",
+      message: "username, password, jabatan, alamat and no_telp are required",
     });
     return;
   }
@@ -28,7 +28,7 @@ const PemilikRegister = async (req, res) => {
   }
   try {
     const hash = await bcrypt.hash(password, 10);
-    const user = await prisma.pemilik.create({
+    const pemilik = await prisma.pemilik.create({
       data: {
         username,
         password: hash,
@@ -42,6 +42,7 @@ const PemilikRegister = async (req, res) => {
       success: true,
       data: {
         username: pemilik.username,
+        password: pemilik.password,
         jabatan: pemilik.jabatan,
         alamat: pemilik.alamat,
         no_telp: pemilik.no_telp,

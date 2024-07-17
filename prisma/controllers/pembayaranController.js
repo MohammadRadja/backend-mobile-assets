@@ -1,27 +1,35 @@
 import { PrismaClient } from "@prisma/client";
-
+import multer from "multer";
+import path from "path";
 const prisma = new PrismaClient();
+const upload = multer({ dest: "uploads/" });
 
 const pembayaranController = {
   // Admin: CRUD semua tabel
   adminCRUDPembayaran: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { jabatan_admin } = req;
-      if (jabatan_admin !== "admin") {
+      const { user } = req;
+      if (user !== "admin") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
 
       const { action, data } = req.body;
+      console.log("Action:", action); // Log data yang diterima
+      console.log("Data diterima:", data); //
       let result;
       switch (action) {
         case "create":
+          const file = req.file;
+          const buktiBayarPath = file ? `/uploads/${file.filename}` : null;
           result = await prisma.pembayaran.create({
             data: {
+              id_rekam_medis: data.id_rekam_medis,
               tgl_pembayaran: data.tgl_pembayaran,
               jumlah_pembayaran: data.jumlah_pembayaran,
+              bukti_bayar: buktiBayarPath,
             },
           });
           break;
@@ -54,8 +62,8 @@ const pembayaranController = {
   pegawaiCRUDPembayaran: async (req, res) => {
     try {
       // Pastikan user memiliki peran pegawai
-      const { jabatan_pegawai } = req;
-      if (jabatan_pegawai !== "pegawai") {
+      const { user } = req;
+      if (user !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -65,11 +73,14 @@ const pembayaranController = {
       let result;
       switch (action) {
         case "create":
+          const file = req.file;
+          const buktiBayarPath = file ? `/uploads/${file.filename}` : null;
           result = await prisma.pembayaran.create({
             data: {
               id_rekam_medis: data.id_rekam_medis,
               tgl_pembayaran: data.tgl_pembayaran,
               jumlah_pembayaran: data.jumlah_pembayaran,
+              bukti_bayar: buktiBayarPath,
             },
           });
           break;
@@ -102,8 +113,8 @@ const pembayaranController = {
   pemilikReadPembayaran: async (req, res) => {
     try {
       // Pastikan user memiliki peran pemilik
-      const { jabatan_pemilik } = req;
-      if (jabatan_pemilik !== "pemilik") {
+      const { user } = req;
+      if (user !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
@@ -112,6 +123,18 @@ const pembayaranController = {
       const { action, data } = req.body;
       let result;
       switch (action) {
+        case "create":
+          const file = req.file;
+          const buktiBayarPath = file ? `/uploads/${file.filename}` : null;
+          result = await prisma.pembayaran.create({
+            data: {
+              id_rekam_medis: data.id_rekam_medis,
+              tgl_pembayaran: data.tgl_pembayaran,
+              jumlah_pembayaran: data.jumlah_pembayaran,
+              bukti_bayar: buktiBayarPath,
+            },
+          });
+          break;
         case "read":
           result = await prisma.pembayaran.findMany();
           break;
