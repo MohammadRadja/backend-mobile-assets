@@ -19,10 +19,27 @@ const rekammedisController = {
       let result;
 
       // Function to parse DD-MM-YYYY date to ISO-8601 format
+      // const parseDate = (dateStr) => {
+      //   const [day, month, year] = dateStr.split("-");
+      //   const date = new Date(`${year}-${month}-${day}T00:00:00Z`);
+      //   if (isNaN(date.getTime())) {
+      //     throw new Error(`Invalid date format: ${dateStr}`);
+      //   }
+      //   console.log(`Parsed date from "${dateStr}" to "${date.toISOString()}"`);
+      //   return date.toISOString;
+      // };
       const parseDate = (dateStr) => {
         const [day, month, year] = dateStr.split("-");
         return new Date(`${year}-${month}-${day}`);
       };
+      
+      const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+      };
+      
 
       switch (action) {
         case "create":
@@ -36,6 +53,7 @@ const rekammedisController = {
               keluhan: data.keluhan,
               diagnosa: data.diagnosa,
               tgl_periksa: parseDate(data.tgl_periksa), // Konversi tgl_periksa
+        
             },
           });
           break;
@@ -74,24 +92,34 @@ const rekammedisController = {
                // Sertakan tgl_periksa dalam hasil query
             },
           });
+
+          result = result.map((rekamMedis) => ({
+            ...rekamMedis,
+            tgl_periksa: formatDate(new Date(rekamMedis.tgl_periksa)),
+          }));
           console.log("Data Rekam Medis:", result);
           break;
 
-        case "update":
-          result = await prisma.rekamMedis.update({
-            where: { id_rekam_medis: data.id_rekam_medis },
-            data: {
-              ...data,
-              id_hewan: parseInt(data.id_hewan, 10),
-              id_pemilik: parseInt(data.id_pemilik, 10),
-              id_pegawai: parseInt(data.id_pegawai, 10),
-              id_obat: parseInt(data.id_obat, 10),
-              keluhan: data.keluhan,
-              diagnosa: data.diagnosa,
-              tgl_periksa: parseDate(data.tgl_periksa), // Konversi tgl_periksa
-            },
-          });
-          break;
+          case "update":
+  if (!data.id_rekam_medis) {
+    return res.status(400).json({ success: false, message: "Missing id_rekam_medis" });
+  }
+  
+  result = await prisma.rekamMedis.update({
+    where: { id_rekam_medis: parseInt(data.id_rekam_medis, 10) }, // Ensure the id is an integer
+    data: {
+      id_hewan: parseInt(data.id_hewan, 10),
+      id_pemilik: parseInt(data.id_pemilik, 10),
+      id_pegawai: parseInt(data.id_pegawai, 10),
+      id_obat: parseInt(data.id_obat, 10),
+      keluhan: data.keluhan,
+      diagnosa: data.diagnosa,
+      tgl_periksa: parseDate(data.tgl_periksa),
+    },
+  });
+  break;
+
+          
 
         case "delete":
           result = await prisma.rekamMedis.delete({
