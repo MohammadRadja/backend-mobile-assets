@@ -47,28 +47,28 @@ router.post(
   "/pegawai/rekammedis",
   authenticateToken,
   isEmployee,
-  rekamMedisController.adminCRUDRekamMedis
+  rekamMedisController.pegawaiCRUDRekamMedis
 );
 //GET -> READ
 router.get(
   "/pegawai/rekammedis",
   authenticateToken,
   isEmployee,
-  rekamMedisController.adminCRUDRekamMedis
+  rekamMedisController.pegawaiCRUDRekamMedis
 );
 //PUT -> UPDATE
 router.put(
   "/pegawai/rekammedis/:id",
   authenticateToken,
   isEmployee,
-  rekamMedisController.adminCRUDRekamMedis
+  rekamMedisController.pegawaiCRUDRekamMedis
 );
 //DELETE
 router.delete(
   "/pegawai/rekammedis/:id",
   authenticateToken,
   isEmployee,
-  rekamMedisController.adminCRUDRekamMedis
+  rekamMedisController.pegawaiCRUDRekamMedis
 );
 
 // Routes untuk Pemilik

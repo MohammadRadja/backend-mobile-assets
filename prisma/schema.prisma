@@ -35,6 +35,7 @@ model Pemilik {
   no_telp     String
   hewan       Hewan[]
   rekam_medis RekamMedis[]
+  appointments Appointment[]
 }
 
 model Hewan {
@@ -94,12 +95,14 @@ model Resep {
 
 model Appointment {
   id_appointment  Int      @id @default(autoincrement())
+  id_pemilik      Int
   id_hewan        Int
   id_dokter       Int
   tgl_appointment DateTime
   catatan         String?
   hewan           Hewan    @relation(fields: [id_hewan], references: [id_hewan])
-  dokter          Doctor   @relation(fields: [id_dokter], references: [id_dokter])
+  doctor          Doctor   @relation(fields: [id_dokter], references: [id_dokter])
+  pemilik         Pemilik   @relation(fields: [id_pemilik], references: [id_pemilik])
 }
 
 model Doctor {
