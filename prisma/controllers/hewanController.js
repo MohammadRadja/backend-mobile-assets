@@ -203,7 +203,14 @@ const hewanController = {
 
       switch (action) {
         case "read":
+          if (!data || !data.id_pemilik) {
+            console.log("Missing id_pemilik in request body:", data);
+            return res
+              .status(400)
+              .json({ success: false, message: "ID pemilik tidak ditemukan." });
+          }
           result = await prisma.hewan.findMany({
+            where: { id_pemilik: id_pemilik },
             include: {
               pemilik: true, // Assuming the relation name is 'pemilik'
             },

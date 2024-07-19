@@ -151,12 +151,12 @@ const dataPemilikController = {
           .json({ success: false, message: "Unauthorized access" });
       }
 
-      const idPegawai = parseInt(req.params.id, 10); // Konversi ke integer
-      if (isNaN(idPegawai)) {
+      const id_pemilik = parseInt(req.params.id, 10); // Konversi ke integer
+      if (isNaN(id_pemilik)) {
         console.log("Invalid id_pegawai provided:", req.params.id);
         return res
           .status(400)
-          .json({ success: false, message: "ID pegawai tidak valid." });
+          .json({ success: false, message: "ID Pemilik tidak valid." });
       }
 
       const { action, data } = req.body;
@@ -166,11 +166,11 @@ const dataPemilikController = {
 
       switch (action) {
         case "read":
-          result = await prisma.pemilik.findMany({
+          result = await prisma.pemilik.findUnique({
             where: { id_pemilik: data.id_pemilik },
           });
           if (!result) {
-            console.log("Pemilik not found for ID:", idPegawai);
+            console.log("Pemilik not found for ID:", id_pemilik);
             return res
               .status(404)
               .json({ success: false, message: "Pemilik not found." });
@@ -195,7 +195,7 @@ const dataPemilikController = {
           }
 
           result = await prisma.pemilik.update({
-            where: { id_pemilik: idPegawai }, // Gunakan id dari parameter URL
+            where: { id_pemilik: id_pemilik }, // Gunakan id dari parameter URL
             data: { ...updateData }, // Kirim data tanpa id_pegawai
           });
           console.log("Update successful:", result);

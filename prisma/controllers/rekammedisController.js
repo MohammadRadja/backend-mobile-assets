@@ -292,7 +292,15 @@ const rekammedisController = {
 
       switch (action) {
         case "read":
-          result = await prisma.rekamMedis.findMany();
+          result = await prisma.rekamMedis.findUnique({
+            where: { id_pemilik: data.id_pemilik },
+          });
+          if (!result) {
+            console.log("Pemilik not found for ID:", id_pemilik);
+            return res
+              .status(404)
+              .json({ success: false, message: "Pemilik not found." });
+          }
           break;
         default:
           return res

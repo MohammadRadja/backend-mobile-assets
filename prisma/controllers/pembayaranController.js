@@ -236,7 +236,15 @@ const pembayaranController = {
           });
           break;
         case "read":
-          result = await prisma.pembayaran.findMany();
+          result = await prisma.pembayaran.findUnique({
+            where: { id_pemilik: data.id_pemilik },
+          });
+          if (!result) {
+            console.log("Pemilik not found for ID:", id_pemilik);
+            return res
+              .status(404)
+              .json({ success: false, message: "Pemilik not found." });
+          }
           break;
         default:
           return res
