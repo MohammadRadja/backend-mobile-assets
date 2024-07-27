@@ -14,5 +14,9 @@ router.post("/pegawai/login", pegawaiController.PegawaiLogin);
 // Routes untuk pemilik
 router.post("/pemilik/register", pemilikController.PemilikRegister);
 router.post("/pemilik/login", pemilikController.PemilikLogin);
+router.post(
+  "/pemilik/forgot-password",
+  pemilikController.PemilikForgotPassword
+);
 
 export default router;

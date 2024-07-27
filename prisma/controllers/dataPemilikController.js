@@ -56,6 +56,10 @@ const dataPemilikController = {
           break;
 
         case "delete":
+          await prisma.relatedTable.deleteMany({
+            where: { id_pemilik: data.id_pemilik },
+          });
+
           result = await prisma.pemilik.delete({
             where: { id_pemilik: data.id_pemilik },
           });

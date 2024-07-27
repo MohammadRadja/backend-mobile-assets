@@ -197,7 +197,7 @@ const hewanController = {
           .json({ success: false, message: "Unauthorized access" });
       }
 
-      const { action } = req.body;
+      const { action, data } = req.body;
       console.log("Received action:", action); // Log action
       let result;
 
@@ -210,7 +210,7 @@ const hewanController = {
               .json({ success: false, message: "ID pemilik tidak ditemukan." });
           }
           result = await prisma.hewan.findMany({
-            where: { id_pemilik: id_pemilik },
+            where: { id_pemilik: data.id_pemilik },
             include: {
               pemilik: true, // Assuming the relation name is 'pemilik'
             },

@@ -112,4 +112,71 @@ const PemilikLogin = async (req, res) => {
   }
 };
 
-export default { PemilikRegister, PemilikLogin };
+const PemilikForgotPassword = async (req, res) => {
+  const { username, no_telp, newPassword } = req.body;
+
+  if (!newPassword || (!username && !no_telp)) {
+    console.log(
+      `Request failed: Missing fields. Username: ${username}, No Telp: ${no_telp}, New Password: ${newPassword}`
+    );
+    return res.status(400).json({
+      success: false,
+      message: "Username or no_telp and newPassword are required",
+    });
+  }
+
+  try {
+    const whereCondition = username
+      ? { username: username }
+      : { no_telp: no_telp };
+
+    console.log(
+      `Searching for user with ${
+        username ? "Username: " + username : "No Telp: " + no_telp
+      }`
+    );
+    const pemilik = await prisma.pemilik.findFirst({ where: whereCondition });
+
+    if (!pemilik) {
+      console.log(
+        `User not found or incorrect details. ${
+          username ? "Username: " + username : "No Telp: " + no_telp
+        }`
+      );
+      return res.status(404).json({
+        success: false,
+        message: "User not found or incorrect details",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    console.log(
+      `Password hashed successfully for ${
+        username ? "Username: " + username : "No Telp: " + no_telp
+      }`
+    );
+
+    await prisma.pemilik.update({
+      where: { id_pemilik: pemilik.id_pemilik },
+      data: { password: hashedPassword },
+    });
+
+    console.log(
+      `Password updated successfully for ${
+        username ? "Username: " + username : "No Telp: " + no_telp
+      }`
+    );
+    return res.status(200).json({
+      success: true,
+      message: "Password successfully updated",
+    });
+  } catch (error) {
+    console.error("Error updating password:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the password",
+    });
+  }
+};
+
+export default { PemilikRegister, PemilikLogin, PemilikForgotPassword };

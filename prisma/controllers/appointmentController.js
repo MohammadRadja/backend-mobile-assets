@@ -57,7 +57,7 @@ const hewanController = {
                 },
               },
               id_dokter: true,
-              doctor: {
+              dokter: {
                 select: {
                   nama_dokter: true,
                 },

@@ -18,7 +18,7 @@ model Admin {
 
 model Pegawai {
   id_pegawai  Int      @id @default(autoincrement())
-  username    String
+  username    String   @unique
   password    String
   jabatan     String
   alamat      String
@@ -28,14 +28,15 @@ model Pegawai {
 
 model Pemilik {
   id_pemilik  Int      @id @default(autoincrement())
-  username    String
+  username    String   @unique
   password    String
   jabatan     String
   alamat      String
   no_telp     String
-  hewan       Hewan[]
-  rekam_medis RekamMedis[]
-  appointments Appointment[]
+  hewan         Hewan[]
+  rekam_medis   RekamMedis[]
+  appointments  Appointment[]
+  pembayaran    Pembayaran[]
 }
 
 model Hewan {
@@ -46,9 +47,10 @@ model Hewan {
   umur          Int
   berat         Float
   jenis_kelamin String
-  pemilik       Pemilik  @relation(fields: [id_pemilik], references: [id_pemilik])
   rekam_medis   RekamMedis[]
   appointments  Appointment[] 
+  pembayaran    Pembayaran[]
+  pemilik       Pemilik?  @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Obat {
@@ -57,6 +59,7 @@ model Obat {
   keterangan   String
   rekam_medis RekamMedis[]
   resep        Resep[]
+  pembayaran     Pembayaran[]
 }
 
 model RekamMedis {
@@ -68,29 +71,43 @@ model RekamMedis {
   keluhan        String
   diagnosa       String
   tgl_periksa    DateTime
-  hewan          Hewan     @relation(fields: [id_hewan], references: [id_hewan])
-  pemilik        Pemilik   @relation(fields: [id_pemilik], references: [id_pemilik])
-  pegawai        Pegawai   @relation(fields: [id_pegawai], references: [id_pegawai])
-  obat           Obat      @relation(fields: [id_obat], references: [id_obat])
-  pembayaran     Pembayaran?
-  resep          Resep?
+  pembayaran     Pembayaran[]
+  resep          Resep[]
+  hewan          Hewan?     @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
+  pemilik        Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
+  pegawai        Pegawai?   @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: Cascade, onUpdate: Cascade)
+  obat           Obat?      @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Pembayaran {
   id_pembayaran   Int        @id @default(autoincrement())
-  id_rekam_medis  Int        @unique
+  id_rekam_medis  Int        
+  id_pemilik      Int
+  id_hewan        Int
+  id_dokter       Int
+  id_appointment  Int
+  id_obat         Int
+  id_resep        Int
   tgl_pembayaran  DateTime
   jumlah_pembayaran Float
-  rekam_medis     RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
+  bukti_pembayaran String
+  rekam_medis     RekamMedis? @relation(fields: [id_rekam_medis], references: [id_rekam_medis], onDelete: Cascade, onUpdate: Cascade)
+  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
+  hewan           Hewan?     @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
+  dokter          Dokter?    @relation(fields: [id_dokter], references: [id_dokter], onDelete: Cascade, onUpdate: Cascade)
+  appointment     Appointment? @relation(fields: [id_appointment], references: [id_appointment], onDelete: Cascade, onUpdate: Cascade)
+  obat            Obat?      @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
+  resep           Resep?     @relation(fields: [id_resep], references: [id_resep], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Resep {
   id_resep        Int        @id @default(autoincrement())
-  id_rekam_medis Int        @unique
+  id_rekam_medis  Int        
   id_obat         Int
   jumlah_obat     Int
-  rekam_medis     RekamMedis @relation(fields: [id_rekam_medis], references: [id_rekam_medis])
-  obat            Obat       @relation(fields: [id_obat], references: [id_obat])
+  pembayaran      Pembayaran[]
+  rekam_medis     RekamMedis? @relation(fields: [id_rekam_medis], references: [id_rekam_medis], onDelete: Cascade, onUpdate: Cascade)
+  obat            Obat?       @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Appointment {
@@ -100,14 +117,16 @@ model Appointment {
   id_dokter       Int
   tgl_appointment DateTime
   catatan         String?
-  hewan           Hewan    @relation(fields: [id_hewan], references: [id_hewan])
-  doctor          Doctor   @relation(fields: [id_dokter], references: [id_dokter])
-  pemilik         Pemilik   @relation(fields: [id_pemilik], references: [id_pemilik])
+  pembayaran      Pembayaran[]
+  hewan           Hewan?    @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
+  dokter          Dokter?   @relation(fields: [id_dokter], references: [id_dokter], onDelete: Cascade, onUpdate: Cascade)
+  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model Doctor {
+model Dokter {
   id_dokter       Int       @id @default(autoincrement())
   nama_dokter     String
   spesialisasi    String
   appointments    Appointment[]
+  pembayaran      Pembayaran[]
 }

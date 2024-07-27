@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const hewanController = {
+const dokterController = {
   // Admin: CRUD semua tabel
   adminCRUDDokter: async (req, res) => {
     try {
@@ -22,7 +22,7 @@ const hewanController = {
       switch (action) {
         case "create":
           // Proses pembuatan data baru
-          result = await prisma.doctor.create({
+          result = await prisma.dokter.create({
             data: {
               nama_dokter: data.nama_dokter,
               spesialisasi: data.spesialisasi,
@@ -31,11 +31,11 @@ const hewanController = {
           break;
 
         case "read":
-          result = await prisma.doctor.findMany();
+          result = await prisma.dokter.findMany();
           break;
 
         case "update":
-          result = await prisma.doctor.update({
+          result = await prisma.dokter.update({
             where: { id_dokter: data.id_dokter },
             data: { ...data }, // Sesuaikan dengan data yang diperlukan
           });
@@ -76,7 +76,7 @@ const hewanController = {
       switch (action) {
         case "create":
           // Proses pembuatan data baru
-          result = await prisma.doctor.create({
+          result = await prisma.dokter.create({
             data: {
               nama_dokter: data.nama_dokter,
               spesialisasi: data.spesialisasi,
@@ -85,18 +85,18 @@ const hewanController = {
           break;
 
         case "read":
-          result = await prisma.doctor.findMany();
+          result = await prisma.dokter.findMany();
           break;
 
         case "update":
-          result = await prisma.doctor.update({
+          result = await prisma.dokter.update({
             where: { id_dokter: data.id_dokter },
             data: { ...data },
           });
           break;
 
         case "delete":
-          result = await prisma.doctor.delete({
+          result = await prisma.dokter.delete({
             where: { id_dokter: data.id_dokter },
           });
           break;
@@ -128,7 +128,7 @@ const hewanController = {
 
       switch (action) {
         case "read":
-          result = await prisma.doctor.findMany();
+          result = await prisma.dokter.findMany();
           break;
 
         default:
@@ -144,4 +144,4 @@ const hewanController = {
   },
 };
 
-export default hewanController;
+export default dokterController;

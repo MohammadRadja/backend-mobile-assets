@@ -5,7 +5,7 @@ import {
   isEmployee,
   isOwner,
 } from "../middlewares/authMiddleware.js";
-import doctorController from "../controllers/doctorController.js";
+import dokterController from "../controllers/dokterController.js";
 
 const router = express.Router();
 
@@ -15,28 +15,28 @@ router.post(
   "/admin/doctor",
   authenticateToken,
   isAdmin,
-  doctorController.adminCRUDDokter
+  dokterController.adminCRUDDokter
 );
 //GET -> READ
 router.get(
   "/admin/doctor",
   authenticateToken,
   isAdmin,
-  doctorController.adminCRUDDokter
+  dokterController.adminCRUDDokter
 );
 //PUT -> UPDATE
 router.put(
   "/admin/doctor/:id",
   authenticateToken,
   isAdmin,
-  doctorController.adminCRUDDokter
+  dokterController.adminCRUDDokter
 );
 //DELETE
 router.delete(
   "/admin/doctor/:id",
   authenticateToken,
   isAdmin,
-  doctorController.adminCRUDDokter
+  dokterController.adminCRUDDokter
 );
 
 // Routes untuk Pegawai
@@ -45,28 +45,28 @@ router.post(
   "/pegawai/doctor",
   authenticateToken,
   isEmployee,
-  doctorController.pegawaiCRUDDokter
+  dokterController.pegawaiCRUDDokter
 );
 //GET -> READ
 router.get(
   "/pegawai/doctor",
   authenticateToken,
   isEmployee,
-  doctorController.pegawaiCRUDDokter
+  dokterController.pegawaiCRUDDokter
 );
 //PUT -> UPDATE
 router.put(
   "/pegawai/doctor/:id",
   authenticateToken,
   isEmployee,
-  doctorController.pegawaiCRUDDokter
+  dokterController.pegawaiCRUDDokter
 );
 //DELETE
 router.delete(
   "/pegawai/doctor/:id",
   authenticateToken,
   isEmployee,
-  doctorController.pegawaiCRUDDokter
+  dokterController.pegawaiCRUDDokter
 );
 
 // Routes untuk Pemilik
@@ -74,7 +74,7 @@ router.post(
   "/pemilik/doctor",
   authenticateToken,
   isOwner,
-  doctorController.pemilikReadDokter
+  dokterController.pemilikReadDokter
 );
 
 export default router;
