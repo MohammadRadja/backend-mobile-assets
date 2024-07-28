@@ -51,6 +51,9 @@ const hewanController = {
 
         case "read":
           result = await prisma.hewan.findMany({
+            orderBy: {
+              id_hewan: "asc",
+            },
             include: {
               pemilik: true, // Assuming the relation name is 'pemilik'
             },
@@ -135,8 +138,11 @@ const hewanController = {
           break;
         case "read":
           result = await prisma.hewan.findMany({
+            orderBy: {
+              id_hewan: "asc",
+            },
             include: {
-              pemilik: true, // Assuming the relation name is 'pemilik'
+              pemilik: true,
             },
           });
           break;
@@ -191,6 +197,7 @@ const hewanController = {
     try {
       // Pastikan user memiliki peran pemilik
       const { user } = req;
+      console.log("User role:", user.role); // Log role user
       if (user.role !== "pemilik") {
         return res
           .status(403)
@@ -199,6 +206,7 @@ const hewanController = {
 
       const { action, data } = req.body;
       console.log("Received action:", action); // Log action
+      console.log("Request data:", data); // Log data request
       let result;
 
       switch (action) {
@@ -210,6 +218,9 @@ const hewanController = {
               .json({ success: false, message: "ID pemilik tidak ditemukan." });
           }
           result = await prisma.hewan.findMany({
+            orderBy: {
+              id_hewan: "asc",
+            },
             where: { id_pemilik: data.id_pemilik },
             include: {
               pemilik: true, // Assuming the relation name is 'pemilik'

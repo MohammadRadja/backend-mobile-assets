@@ -45,7 +45,11 @@ const dataPegawaiController = {
           break;
 
         case "read":
-          result = await prisma.pegawai.findMany();
+          result = await prisma.pegawai.findMany({
+            orderBy: {
+              id_pegawai: "asc", // Urutkan berdasarkan id_pemilik dalam urutan naik (ascending)
+            },
+          });
           break;
 
         case "update":
@@ -67,6 +71,11 @@ const dataPegawaiController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
+      console.error("Delete Pegawai from Admin - Response status: 500");
+      console.error(
+        "Delete Pegawai from Admin - Response body:",
+        error.message
+      );
       return res.status(500).json({ success: false, message: error.message });
     }
   },

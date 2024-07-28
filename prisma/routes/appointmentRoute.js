@@ -45,28 +45,28 @@ router.post(
   "/pegawai/appointment",
   authenticateToken,
   isEmployee,
-  appointmentController.adminCRUDAppointment
+  appointmentController.pegawaiCRUDAppointment
 );
 //GET -> READ
-router.get(
+router.post(
   "/pegawai/appointment",
   authenticateToken,
   isEmployee,
-  appointmentController.adminCRUDAppointment
+  appointmentController.pegawaiCRUDAppointment
 );
 //PUT -> UPDATE
 router.put(
   "/pegawai/appointment/:id",
   authenticateToken,
   isEmployee,
-  appointmentController.adminCRUDAppointment
+  appointmentController.pegawaiCRUDAppointment
 );
 //DELETE
 router.delete(
   "/pegawai/appointment/:id",
   authenticateToken,
   isEmployee,
-  appointmentController.adminCRUDAppointment
+  appointmentController.pegawaiCRUDAppointment
 );
 
 // Routes untuk Pemilik
@@ -74,7 +74,7 @@ router.get(
   "/pemilik/appointment",
   authenticateToken,
   isOwner,
-  appointmentController.adminCRUDAppointment
+  appointmentController.pemilikReadAppointment
 );
 
 export default router;

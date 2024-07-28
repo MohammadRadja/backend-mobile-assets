@@ -31,7 +31,11 @@ const dokterController = {
           break;
 
         case "read":
-          result = await prisma.dokter.findMany();
+          result = await prisma.dokter.findMany({
+            orderBy: {
+              id_dokter: "asc",
+            },
+          });
           break;
 
         case "update":
@@ -85,7 +89,11 @@ const dokterController = {
           break;
 
         case "read":
-          result = await prisma.dokter.findMany();
+          result = await prisma.dokter.findMany({
+            orderBy: {
+              id_dokter: "asc",
+            },
+          });
           break;
 
         case "update":
@@ -128,7 +136,11 @@ const dokterController = {
 
       switch (action) {
         case "read":
-          result = await prisma.dokter.findMany();
+          result = await prisma.dokter.findMany({
+            orderBy: {
+              id_dokter: "asc",
+            },
+          });
           break;
 
         default:

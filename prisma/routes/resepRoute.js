@@ -60,7 +60,7 @@ router.post(
   resepController.pegawaiCRUDResep
 );
 // GET
-router.get(
+router.post(
   "/pegawai/resep",
   logRequest,
   authenticateToken,

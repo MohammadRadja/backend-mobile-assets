@@ -20,7 +20,7 @@ router.post(
   rekamMedisController.adminCRUDRekamMedis
 );
 //GET -> READ
-router.get(
+router.post(
   "/admin/rekammedis",
   authenticateToken,
   isAdmin,
@@ -50,7 +50,7 @@ router.post(
   rekamMedisController.pegawaiCRUDRekamMedis
 );
 //GET -> READ
-router.get(
+router.post(
   "/pegawai/rekammedis",
   authenticateToken,
   isEmployee,
@@ -72,7 +72,7 @@ router.delete(
 );
 
 // Routes untuk Pemilik
-router.get(
+router.post(
   "/pemilik/rekammedis",
   authenticateToken,
   isOwner,

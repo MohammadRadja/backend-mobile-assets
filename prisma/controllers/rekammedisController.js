@@ -1,6 +1,22 @@
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+// const to parse DD-MM-YYYY date to ISO-8601 format
+const parseDate = (dateStr) => {
+  const [day, month, year] = dateStr.split("-");
+  const date = new Date(`${year}-${month}-${day}`);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date format: ${dateStr}`);
+  }
+  console.log(`Parsed date from "${dateStr}" to "${date.toISOString()}"`);
+  return date.toISOString(); // Corrected line
+};
+const formatDate = (date) => {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 
 const rekammedisController = {
   adminCRUDRekamMedis: async (req, res) => {
@@ -17,29 +33,6 @@ const rekammedisController = {
       console.log("Action:", action); // Log data yang diterima
       console.log("Data diterima:", data);
       let result;
-
-      // const to parse DD-MM-YYYY date to ISO-8601 format
-      const parseDate = (dateStr) => {
-        const [day, month, year] = dateStr.split("-");
-        const date = new Date(`${year}-${month}-${day}`);
-        if (isNaN(date.getTime())) {
-          throw new Error(`Invalid date format: ${dateStr}`);
-        }
-        console.log(`Parsed date from "${dateStr}" to "${date.toISOString()}"`);
-        return date.toISOString(); // Corrected line
-      };
-      // const parseDate = (dateStr) => {
-      //   const [day, month, year] = dateStr.split("-");
-      //   return new Date(`${year}-${month}-${day}`);
-      // };
-
-      const formatDate = (date) => {
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
-      };
-
       switch (action) {
         case "create":
           // Validasi bahwa tgl_periksa ada dalam data yang diterima
@@ -58,6 +51,9 @@ const rekammedisController = {
 
         case "read":
           result = await prisma.rekamMedis.findMany({
+            orderBy: {
+              id_rekam_medis: "asc",
+            },
             select: {
               id_rekam_medis: true,
               id_hewan: true,
@@ -120,14 +116,11 @@ const rekammedisController = {
           break;
 
         case "delete":
-          if (!data.id_rekam_medis) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Missing id_rekam_medis" });
-          }
-          result = await prisma.rekamMedis.delete({
-            where: { id_rekam_medis: parseInt(data.id_rekam_medis, 10) },
+          result = await prisma.rekamMedis.deleteMany({
+            where: { id_rekam_medis: data.id_rekam_medis },
           });
+          console.log("Delete Rekam Medis - Response status: 200");
+          console.log("Delete Rekam Medis - Response body:", result);
           break;
         default:
           return res
@@ -155,28 +148,6 @@ const rekammedisController = {
       console.log("Data diterima:", data);
       let result;
 
-      // const to parse DD-MM-YYYY date to ISO-8601 format
-      const parseDate = (dateStr) => {
-        const [day, month, year] = dateStr.split("-");
-        const date = new Date(`${year}-${month}-${day}`);
-        if (isNaN(date.getTime())) {
-          throw new Error(`Invalid date format: ${dateStr}`);
-        }
-        console.log(`Parsed date from "${dateStr}" to "${date.toISOString()}"`);
-        return date.toISOString(); // Corrected line
-      };
-      // const parseDate = (dateStr) => {
-      //   const [day, month, year] = dateStr.split("-");
-      //   return new Date(`${year}-${month}-${day}`);
-      // };
-
-      const formatDate = (date) => {
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
-      };
-
       switch (action) {
         case "create":
           // Validasi bahwa tgl_periksa ada dalam data yang diterima
@@ -195,6 +166,9 @@ const rekammedisController = {
 
         case "read":
           result = await prisma.rekamMedis.findMany({
+            orderBy: {
+              id_rekam_medis: "asc",
+            },
             select: {
               id_rekam_medis: true,
               id_hewan: true,
@@ -257,14 +231,11 @@ const rekammedisController = {
           break;
 
         case "delete":
-          if (!data.id_rekam_medis) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Missing id_rekam_medis" });
-          }
-          result = await prisma.rekamMedis.delete({
-            where: { id_rekam_medis: parseInt(data.id_rekam_medis, 10) },
+          result = await prisma.rekamMedis.deleteMany({
+            where: { id_rekam_medis: data.id_rekam_medis },
           });
+          console.log("Delete Rekam Medis - Response status: 200");
+          console.log("Delete Rekam Medis - Response body:", result);
           break;
         default:
           return res
@@ -288,20 +259,57 @@ const rekammedisController = {
       }
 
       const { action, data } = req.body;
+      console.log("Action:", action); // Log data yang diterima
+      console.log("Data diterima:", data);
       let result;
 
       switch (action) {
         case "read":
-          result = await prisma.rekamMedis.findUnique({
+          result = await prisma.rekamMedis.findMany({
             where: { id_pemilik: data.id_pemilik },
+            orderBy: {
+              id_rekam_medis: "asc",
+            },
+            select: {
+              id_rekam_medis: true,
+              id_hewan: true,
+              hewan: {
+                select: {
+                  nama_hewan: true,
+                },
+              },
+              id_pemilik: true,
+              pemilik: {
+                select: {
+                  username: true,
+                },
+              },
+              id_pegawai: true,
+              pegawai: {
+                select: {
+                  username: true,
+                },
+              },
+              id_obat: true,
+              obat: {
+                select: {
+                  nama_obat: true,
+                },
+              },
+              keluhan: true,
+              diagnosa: true,
+              tgl_periksa: true,
+              // Sertakan tgl_periksa dalam hasil query
+            },
           });
-          if (!result) {
-            console.log("Pemilik not found for ID:", id_pemilik);
-            return res
-              .status(404)
-              .json({ success: false, message: "Pemilik not found." });
-          }
+
+          result = result.map((rekamMedis) => ({
+            ...rekamMedis,
+            tgl_periksa: formatDate(new Date(rekamMedis.tgl_periksa)),
+          }));
+          console.log("Data Rekam Medis:", result);
           break;
+
         default:
           return res
             .status(400)

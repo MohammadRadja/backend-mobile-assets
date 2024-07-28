@@ -12,28 +12,28 @@ const router = express.Router();
 // Routes untuk Admin
 //POST -> CREATE
 router.post(
-  "/admin/doctor",
+  "/admin/dokter",
   authenticateToken,
   isAdmin,
   dokterController.adminCRUDDokter
 );
 //GET -> READ
-router.get(
-  "/admin/doctor",
+router.post(
+  "/admin/dokter",
   authenticateToken,
   isAdmin,
   dokterController.adminCRUDDokter
 );
 //PUT -> UPDATE
 router.put(
-  "/admin/doctor/:id",
+  "/admin/dokter/:id",
   authenticateToken,
   isAdmin,
   dokterController.adminCRUDDokter
 );
 //DELETE
 router.delete(
-  "/admin/doctor/:id",
+  "/admin/dokter/:id",
   authenticateToken,
   isAdmin,
   dokterController.adminCRUDDokter
@@ -42,28 +42,28 @@ router.delete(
 // Routes untuk Pegawai
 //POST -> CREATE
 router.post(
-  "/pegawai/doctor",
+  "/pegawai/dokter",
   authenticateToken,
   isEmployee,
   dokterController.pegawaiCRUDDokter
 );
 //GET -> READ
 router.get(
-  "/pegawai/doctor",
+  "/pegawai/dokter",
   authenticateToken,
   isEmployee,
   dokterController.pegawaiCRUDDokter
 );
 //PUT -> UPDATE
 router.put(
-  "/pegawai/doctor/:id",
+  "/pegawai/dokter/:id",
   authenticateToken,
   isEmployee,
   dokterController.pegawaiCRUDDokter
 );
 //DELETE
 router.delete(
-  "/pegawai/doctor/:id",
+  "/pegawai/dokter/:id",
   authenticateToken,
   isEmployee,
   dokterController.pegawaiCRUDDokter
@@ -71,7 +71,7 @@ router.delete(
 
 // Routes untuk Pemilik
 router.post(
-  "/pemilik/doctor",
+  "/pemilik/dokter",
   authenticateToken,
   isOwner,
   dokterController.pemilikReadDokter

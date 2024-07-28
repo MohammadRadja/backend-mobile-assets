@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
+import bcrypt from "bcryptjs";
 
 const dataPemilikController = {
   adminCRUDDataPemilik: async (req, res) => {
@@ -45,7 +45,11 @@ const dataPemilikController = {
           break;
 
         case "read":
-          result = await prisma.pemilik.findMany();
+          result = await prisma.pemilik.findMany({
+            orderBy: {
+              id_pemilik: "asc", // Urutkan berdasarkan id_pemilik dalam urutan naik (ascending)
+            },
+          });
           break;
 
         case "update":
@@ -56,13 +60,12 @@ const dataPemilikController = {
           break;
 
         case "delete":
-          await prisma.relatedTable.deleteMany({
+          result = await prisma.pemilik.deleteMany({
             where: { id_pemilik: data.id_pemilik },
           });
+          console.log("Delete Pemilik - Response status: 200");
+          console.log("Delete Pemilik - Response body:", result);
 
-          result = await prisma.pemilik.delete({
-            where: { id_pemilik: data.id_pemilik },
-          });
           break;
         default:
           return res
@@ -71,6 +74,11 @@ const dataPemilikController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
+      console.error("Delete Pemilik from Admin - Response status: 500");
+      console.error(
+        "Delete Pemilik from Admin - Response body:",
+        error.message
+      );
       return res.status(500).json({ success: false, message: error.message });
     }
   },
@@ -118,7 +126,11 @@ const dataPemilikController = {
           break;
 
         case "read":
-          result = await prisma.pemilik.findMany();
+          result = await prisma.pemilik.findMany({
+            orderBy: {
+              id_pemilik: "asc", // Urutkan berdasarkan id_pemilik dalam urutan naik (ascending)
+            },
+          });
           break;
 
         case "update":
@@ -147,7 +159,7 @@ const dataPemilikController = {
   // Pemilik hanya dapat melihat data
   pemilikCRUDDataPemilik: async (req, res) => {
     try {
-      // Pastikan user memiliki peran pegawai
+      // Pastikan user memiliki peran pemilik
       const { user } = req;
       if (user.role !== "pemilik") {
         return res
@@ -157,7 +169,7 @@ const dataPemilikController = {
 
       const id_pemilik = parseInt(req.params.id, 10); // Konversi ke integer
       if (isNaN(id_pemilik)) {
-        console.log("Invalid id_pegawai provided:", req.params.id);
+        console.log("Invalid id_pemilik provided:", req.params.id);
         return res
           .status(400)
           .json({ success: false, message: "ID Pemilik tidak valid." });
@@ -171,7 +183,7 @@ const dataPemilikController = {
       switch (action) {
         case "read":
           result = await prisma.pemilik.findUnique({
-            where: { id_pemilik: data.id_pemilik },
+            where: { id_pemilik: id_pemilik },
           });
           if (!result) {
             console.log("Pemilik not found for ID:", id_pemilik);
@@ -182,7 +194,7 @@ const dataPemilikController = {
           break;
 
         case "update":
-          console.log("Updating data for pemilik ID:", idPegawai);
+          console.log("Updating data for pemilik ID:", id_pemilik);
           if (!data) {
             console.log("Missing data in request body:", data);
             return res
@@ -190,8 +202,8 @@ const dataPemilikController = {
               .json({ success: false, message: "Data pemilik tidak lengkap." });
           }
 
-          // Hapus id_pegawai dari data yang akan diupdate
-          const { id_pemilik, password, ...updateData } = data;
+          // Hapus id_pemilik dari data yang akan diupdate
+          const { id_pemilik: dataIdPemilik, password, ...updateData } = data;
 
           // Hash password jika ada
           if (password) {
@@ -200,7 +212,7 @@ const dataPemilikController = {
 
           result = await prisma.pemilik.update({
             where: { id_pemilik: id_pemilik }, // Gunakan id dari parameter URL
-            data: { ...updateData }, // Kirim data tanpa id_pegawai
+            data: { ...updateData }, // Kirim data tanpa id_pemilik
           });
           console.log("Update successful:", result);
           break;
@@ -211,6 +223,7 @@ const dataPemilikController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
+      console.error("Error in pemilikCRUDDataPemilik:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },

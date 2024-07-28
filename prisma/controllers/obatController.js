@@ -119,15 +119,13 @@ const obatController = {
           .json({ success: false, message: "Unauthorized access" });
       }
 
-      const { action } = req.body;
+      const { action, data } = req.body;
       console.log("Received action:", action); // Log action
       let result;
 
       switch (action) {
         case "read":
-          result = await prisma.obat.findUnique({
-            where: { id_pemilik: data.id_pemilik },
-          });
+          result = await prisma.obat.findMany();
           if (!result) {
             console.log("Pemilik not found for ID:", id_pemilik);
             return res
