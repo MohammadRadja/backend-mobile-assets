@@ -20,6 +20,7 @@ CREATE TABLE `Pegawai` (
     `alamat` VARCHAR(191) NOT NULL,
     `no_telp` VARCHAR(191) NOT NULL,
 
+    UNIQUE INDEX `Pegawai_username_key`(`username`),
     PRIMARY KEY (`id_pegawai`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -32,6 +33,7 @@ CREATE TABLE `Pemilik` (
     `alamat` VARCHAR(191) NOT NULL,
     `no_telp` VARCHAR(191) NOT NULL,
 
+    UNIQUE INDEX `Pemilik_username_key`(`username`),
     PRIMARY KEY (`id_pemilik`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -66,7 +68,7 @@ CREATE TABLE `RekamMedis` (
     `id_obat` INTEGER NOT NULL,
     `keluhan` VARCHAR(191) NOT NULL,
     `diagnosa` VARCHAR(191) NOT NULL,
-    `tgl_periksa` DATE NOT NULL,
+    `tgl_periksa` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id_rekam_medis`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -81,9 +83,9 @@ CREATE TABLE `Pembayaran` (
     `id_appointment` INTEGER NOT NULL,
     `id_obat` INTEGER NOT NULL,
     `id_resep` INTEGER NOT NULL,
-    `tgl_pembayaran` DATE NOT NULL,
+    `tgl_pembayaran` DATETIME(3) NOT NULL,
     `jumlah_pembayaran` DOUBLE NOT NULL,
-    `bukti_pembayaran` VARCHAR(255) NOT NULL,
+    `bukti_pembayaran` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id_pembayaran`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -104,7 +106,7 @@ CREATE TABLE `Appointment` (
     `id_pemilik` INTEGER NOT NULL,
     `id_hewan` INTEGER NOT NULL,
     `id_dokter` INTEGER NOT NULL,
-    `tgl_appointment` DATE NOT NULL,
+    `tgl_appointment` DATETIME(3) NOT NULL,
     `catatan` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id_appointment`)
@@ -118,27 +120,6 @@ CREATE TABLE `Dokter` (
 
     PRIMARY KEY (`id_dokter`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Foreign key to Pemilik table
-ALTER TABLE `Appointment`
-ADD CONSTRAINT `Appointment_id_pemilik_fkey`
-FOREIGN KEY (`id_pemilik`) REFERENCES `Pemilik`(`id_pemilik`)
-ON DELETE CASCADE
-ON UPDATE CASCADE;
-
--- Foreign key to Hewan table
-ALTER TABLE `Appointment`
-ADD CONSTRAINT `Appointment_id_hewan_fkey`
-FOREIGN KEY (`id_hewan`) REFERENCES `Hewan`(`id_hewan`)
-ON DELETE CASCADE
-ON UPDATE CASCADE;
-
--- Foreign key to Dokter table
-ALTER TABLE `Appointment`
-ADD CONSTRAINT `Appointment_id_dokter_fkey`
-FOREIGN KEY (`id_dokter`) REFERENCES `Dokter`(`id_dokter`)
-ON DELETE CASCADE
-ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Hewan` ADD CONSTRAINT `Hewan_id_pemilik_fkey` FOREIGN KEY (`id_pemilik`) REFERENCES `Pemilik`(`id_pemilik`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -156,16 +137,37 @@ ALTER TABLE `RekamMedis` ADD CONSTRAINT `RekamMedis_id_pegawai_fkey` FOREIGN KEY
 ALTER TABLE `RekamMedis` ADD CONSTRAINT `RekamMedis_id_obat_fkey` FOREIGN KEY (`id_obat`) REFERENCES `Obat`(`id_obat`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_rekam_medis_fkey` FOREIGN KEY (`id_rekam_medis`) REFERENCES `RekamMedis`(`id_rekam_medis`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_pemilik_fkey` FOREIGN KEY (`id_pemilik`) REFERENCES `Pemilik`(`id_pemilik`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_hewan_fkey` FOREIGN KEY (`id_hewan`) REFERENCES `Hewan`(`id_hewan`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_dokter_fkey` FOREIGN KEY (`id_dokter`) REFERENCES `Dokter`(`id_dokter`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_appointment_fkey` FOREIGN KEY (`id_appointment`) REFERENCES `Appointment`(`id_appointment`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_obat_fkey` FOREIGN KEY (`id_obat`) REFERENCES `Obat`(`id_obat`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_resep_fkey` FOREIGN KEY (`id_resep`) REFERENCES `Resep`(`id_resep`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Resep` ADD CONSTRAINT `Resep_id_rekam_medis_fkey` FOREIGN KEY (`id_rekam_medis`) REFERENCES `RekamMedis`(`id_rekam_medis`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Resep` ADD CONSTRAINT `Resep_id_obat_fkey` FOREIGN KEY (`id_obat`) REFERENCES `Obat`(`id_obat`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_rekam_medis_fkey` FOREIGN KEY (`id_rekam_medis`) REFERENCES `RekamMedis`(`id_rekam_medis`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_pemilik_fkey` FOREIGN KEY (`id_pemilik`) REFERENCES `Pemilik`(`id_pemilik`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_hewan_fkey` FOREIGN KEY (`id_hewan`) REFERENCES `Hewan`(`id_hewan`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_dokter_fkey` FOREIGN KEY (`id_dokter`) REFERENCES `Dokter`(`id_dokter`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_appointment_fkey` FOREIGN KEY (`id_appointment`) REFERENCES `Appointment`(`id_appointment`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_obat_fkey` FOREIGN KEY (`id_obat`) REFERENCES `Obat`(`id_obat`) ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE `Pembayaran` ADD CONSTRAINT `Pembayaran_id_resep_fkey` FOREIGN KEY (`id_resep`) REFERENCES `Resep`(`id_resep`) ON DELETE CASCADE     ON UPDATE CASCADE;
+ALTER TABLE `Appointment` ADD CONSTRAINT `Appointment_id_hewan_fkey` FOREIGN KEY (`id_hewan`) REFERENCES `Hewan`(`id_hewan`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Appointment` ADD CONSTRAINT `Appointment_id_dokter_fkey` FOREIGN KEY (`id_dokter`) REFERENCES `Dokter`(`id_dokter`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Appointment` ADD CONSTRAINT `Appointment_id_pemilik_fkey` FOREIGN KEY (`id_pemilik`) REFERENCES `Pemilik`(`id_pemilik`) ON DELETE CASCADE ON UPDATE CASCADE;

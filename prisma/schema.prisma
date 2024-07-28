@@ -82,22 +82,22 @@ model RekamMedis {
 model Pembayaran {
   id_pembayaran   Int        @id @default(autoincrement())
   id_rekam_medis  Int        
+  rekam_medis     RekamMedis? @relation(fields: [id_rekam_medis], references: [id_rekam_medis], onDelete: Cascade, onUpdate: Cascade)
   id_pemilik      Int
+  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
   id_hewan        Int
+  hewan           Hewan?     @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
   id_dokter       Int
+  dokter          Dokter?    @relation(fields: [id_dokter], references: [id_dokter], onDelete: Cascade, onUpdate: Cascade)
   id_appointment  Int
+  appointment     Appointment? @relation(fields: [id_appointment], references: [id_appointment], onDelete: Cascade, onUpdate: Cascade)
   id_obat         Int
+  obat            Obat?      @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
   id_resep        Int
+  resep           Resep?     @relation(fields: [id_resep], references: [id_resep], onDelete: Cascade, onUpdate: Cascade)
   tgl_pembayaran  DateTime
   jumlah_pembayaran Float
   bukti_pembayaran String
-  rekam_medis     RekamMedis? @relation(fields: [id_rekam_medis], references: [id_rekam_medis], onDelete: Cascade, onUpdate: Cascade)
-  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
-  hewan           Hewan?     @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
-  dokter          Dokter?    @relation(fields: [id_dokter], references: [id_dokter], onDelete: Cascade, onUpdate: Cascade)
-  appointment     Appointment? @relation(fields: [id_appointment], references: [id_appointment], onDelete: Cascade, onUpdate: Cascade)
-  obat            Obat?      @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
-  resep           Resep?     @relation(fields: [id_resep], references: [id_resep], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Resep {

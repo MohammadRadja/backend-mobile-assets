@@ -35,7 +35,7 @@ router.put(
 );
 //DELETE
 router.delete(
-  "/admin/pembayaran/:id",
+  "/admin/pembayaran/",
   authenticateToken,
   isAdmin,
   pembayaranController.adminCRUDPembayaran

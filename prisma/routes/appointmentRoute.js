@@ -74,7 +74,7 @@ router.get(
   "/pemilik/appointment",
   authenticateToken,
   isOwner,
-  appointmentController.pemilikReadAppointment
+  appointmentController.pemilikCRUDAppointment
 );
 
 export default router;
