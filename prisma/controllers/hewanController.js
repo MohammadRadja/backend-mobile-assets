@@ -195,7 +195,6 @@ const hewanController = {
   // Pemilik: Hanya dapat melihat data
   pemilikReadHewan: async (req, res) => {
     try {
-      // Pastikan user memiliki peran pemilik
       const { user } = req;
       console.log("User role:", user.role); // Log role user
       if (user.role !== "pemilik") {
@@ -207,34 +206,35 @@ const hewanController = {
       const { action, data } = req.body;
       console.log("Received action:", action); // Log action
       console.log("Request data:", data); // Log data request
-      let result;
 
-      switch (action) {
-        case "read":
-          if (!data || !data.id_pemilik) {
-            console.log("Missing id_pemilik in request body:", data);
-            return res
-              .status(400)
-              .json({ success: false, message: "ID pemilik tidak ditemukan." });
-          }
-          result = await prisma.hewan.findMany({
-            orderBy: {
-              id_hewan: "asc",
-            },
-            where: { id_pemilik: data.id_pemilik },
-            include: {
-              pemilik: true, // Assuming the relation name is 'pemilik'
-            },
-          });
-          break;
+      if (action === "read") {
+        const idPemilik = user.id; // Ambil id_pemilik dari user
+        console.log("Fetching hewan for id_pemilik:", idPemilik);
 
-        default:
-          console.log("Invalid action:", action); // Log invalid action
+        if (!idPemilik) {
+          console.log("Missing id_pemilik in user object.");
           return res
             .status(400)
-            .json({ success: false, message: "Invalid action" });
+            .json({ success: false, message: "ID pemilik tidak ditemukan." });
+        }
+
+        const result = await prisma.hewan.findMany({
+          orderBy: {
+            id_hewan: "asc",
+          },
+          where: { id_pemilik: idPemilik },
+          include: {
+            pemilik: true,
+          },
+        });
+
+        return res.status(200).json({ success: true, data: result });
+      } else {
+        console.log("Invalid action:", action); // Log invalid action
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid action" });
       }
-      return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("Error in pemilikReadHewan:", error);
       return res.status(500).json({ success: false, message: error.message });

@@ -235,65 +235,92 @@ const pembayaranController = {
           });
           break;
         case "read":
-          result = await prisma.pembayaran.findMany({
-            orderBy: {
-              id_pembayaran: "asc",
-            },
-            select: {
-              id_pembayaran: true,
-              id_rekam_medis: true,
-              rekamMedis: {
-                select: {
-                  keluhan: true,
-                },
-              },
-              id_pemilik: true,
-              pemilik: {
-                select: {
-                  username: true,
-                },
-              },
-              id_hewan: true,
-              hewan: {
-                select: {
-                  nama_hewan: true,
-                },
-              },
-              id_dokter: true,
-              dokter: {
-                select: {
-                  nama_dokter: true,
-                },
-              },
-              id_appointment: true,
-              appointment: {
-                select: {
-                  catatan: true,
-                },
-              },
-              id_obat: true,
-              obat: {
-                select: {
-                  nama_obat: true,
-                },
-              },
-              id_resep: true,
-              resep: {
-                select: {
-                  jumlah_obat: true,
-                },
-              },
-              tgl_pembayaran: true,
-              jumlah_pembayaran: true,
-              bukti_pembayaran: true,
-            },
-          });
+          try {
+            console.log("Fetching data pembayaran...");
 
-          result = result.map((pembayaran) => ({
-            ...pembayaran,
-            tgl_pembayaran: formatDate(new Date(pembayaran.tgl_pembayaran)),
-          }));
-          console.log("Data Pembayaran:", result);
+            // Ambil data pembayaran
+            const result = await prisma.pembayaran.findMany({
+              orderBy: {
+                id_pembayaran: "asc",
+              },
+              select: {
+                id_pembayaran: true,
+                id_rekam_medis: true,
+                rekam_medis: {
+                  // Sesuaikan dengan nama relasi di skema
+                  select: {
+                    keluhan: true,
+                  },
+                },
+                id_pemilik: true,
+                pemilik: {
+                  // Sesuaikan dengan nama relasi di skema
+                  select: {
+                    username: true,
+                  },
+                },
+                id_hewan: true,
+                hewan: {
+                  // Sesuaikan dengan nama relasi di skema
+                  select: {
+                    nama_hewan: true,
+                  },
+                },
+                id_dokter: true,
+                dokter: {
+                  // Sesuaikan dengan nama relasi di skema
+                  select: {
+                    nama_dokter: true,
+                  },
+                },
+                id_appointment: true,
+                appointment: {
+                  // Sesuaikan dengan nama relasi di skema
+                  select: {
+                    catatan: true,
+                  },
+                },
+                id_obat: true,
+                obat: {
+                  // Sesuaikan dengan nama relasi di skema
+                  select: {
+                    nama_obat: true,
+                  },
+                },
+                id_resep: true,
+                resep: {
+                  // Sesuaikan dengan nama relasi di skema
+                  select: {
+                    jumlah_obat: true,
+                  },
+                },
+                tgl_pembayaran: true,
+                jumlah_pembayaran: true,
+                bukti_pembayaran: true,
+              },
+            });
+
+            console.log("Raw Data Pembayaran:", result);
+
+            // Format data pembayaran
+            const formattedResult = result.map((pembayaran) => ({
+              ...pembayaran,
+              tgl_pembayaran: formatDate(new Date(pembayaran.tgl_pembayaran)),
+              jumlah_pembayaran: pembayaran.jumlah_pembayaran.toString(),
+            }));
+
+            // Kirim respons
+            return res.json({ success: "read", data: formattedResult });
+
+            console.log("Formatted Data Pembayaran:", formattedResult);
+          } catch (error) {
+            console.error("Error fetching data pembayaran:", error);
+            // Kirim respons error
+            return res.status(500).json({
+              success: "error",
+              message: "Error fetching data pembayaran",
+            });
+          }
           break;
 
         case "update":
@@ -307,7 +334,7 @@ const pembayaranController = {
             ? `/BuktiPembayaran/${updatedFile.filename}`
             : null;
           result = await prisma.pembayaran.update({
-            where: { id_pembayaran: parseInt(data.id_pembayaran, 10) }, // Ensure the id is an integer
+            where: { id_pembayaran: data.id_pembayaran },
             data: {
               id_rekam_medis: parseInt(data.id_rekam_medis, 10),
               id_pemilik: parseInt(data.id_pemilik, 10),
@@ -317,7 +344,7 @@ const pembayaranController = {
               id_obat: parseInt(data.id_obat, 10),
               id_resep: parseInt(data.id_resep, 10),
               tgl_pembayaran: parseDate(data.tgl_pembayaran),
-              jumlah_pembayaran: data.jumlah_pembayaran,
+              jumlah_pembayaran: parseInt(data.jumlah_pembayaran, 10),
               bukti_bayar: updatedBuktiBayarPath,
             },
           });
@@ -330,8 +357,13 @@ const pembayaranController = {
               .json({ success: false, message: "Missing ID Pembayaran" });
           }
           result = await prisma.pembayaran.delete({
-            where: { id_rekam_medis: parseInt(data.id_rekam_medis, 10) },
+            where: { id_pembayaran: data.id_pembayaran },
           });
+          return res.json({
+            success: true,
+            message: "Pembayaran deleted successfully",
+          });
+
           break;
         default:
           return res
@@ -371,7 +403,7 @@ const pembayaranController = {
           });
           break;
         case "read":
-          result = await prisma.pembayaran.findUnique({
+          result = await prisma.pembayaran.findMany({
             where: { id_pemilik: data.id_pemilik },
           });
           if (!result) {

@@ -37,6 +37,7 @@ model Pemilik {
   rekam_medis   RekamMedis[]
   appointments  Appointment[]
   pembayaran    Pembayaran[]
+  resep   Resep[]
 }
 
 model Hewan {
@@ -102,10 +103,12 @@ model Pembayaran {
 
 model Resep {
   id_resep        Int        @id @default(autoincrement())
+  id_pemilik      Int
   id_rekam_medis  Int        
   id_obat         Int
   jumlah_obat     Int
   pembayaran      Pembayaran[]
+  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
   rekam_medis     RekamMedis? @relation(fields: [id_rekam_medis], references: [id_rekam_medis], onDelete: Cascade, onUpdate: Cascade)
   obat            Obat?       @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
 }

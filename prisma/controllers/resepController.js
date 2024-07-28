@@ -253,6 +253,9 @@ const resepController = {
             orderBy: {
               id_resep: "asc",
             },
+            where: {
+              id_pemilik: data.id_pemilik,
+            },
           });
           break;
 
