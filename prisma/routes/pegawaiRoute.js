@@ -23,6 +23,12 @@ router.get(
   isAdmin,
   dataPegawaiController.adminCRUDDataPegawai
 );
+router.get(
+  "/pemilik/pegawai",
+  authenticateToken,
+  isAdmin,
+  dataPegawaiController.PemilikiReadDatapegawai
+);
 //PUT -> UPDATE
 router.put(
   "/admin/pegawai/:id",

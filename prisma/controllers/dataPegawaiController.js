@@ -156,6 +156,60 @@ const dataPegawaiController = {
       return res.status(500).json({ success: false, message: error.message });
     }
   },
+
+  PemilikiReadDatapegawai: async (req, res) => {
+    console.log("Request received:", req.method, req.path);
+    try {
+      const { user } = req;
+      console.log("User role:", user.role);
+      if (user.role !== "pemilik") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Unauthorized access" });
+      }
+
+      const idPegawai = parseInt(req.params.id, 10); // Konversi ke integer
+      if (isNaN(idPegawai)) {
+        console.log("Invalid id_pegawai provided:", req.params.id);
+        return res
+          .status(400)
+          .json({ success: false, message: "ID pegawai tidak valid." });
+      }
+
+      const { action, data } = req.body;
+      console.log("Action:", action);
+      console.log("Data diterima:", data);
+      let result;
+
+      switch (action) {
+        case "read":
+          console.log("Fetching data for pegawai ID:", idPegawai);
+          result = await prisma.pegawai.findUnique({
+            where: { id_pegawai: idPegawai },
+          });
+          if (!result) {
+            console.log("Pegawai not found for ID:", idPegawai);
+            return res
+              .status(404)
+              .json({ success: false, message: "Pegawai not found." });
+          }
+          break;
+
+        default:
+          console.log("Invalid action received:", action);
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid action" });
+      }
+
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error:", error.message);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
 };
+
+
 
 export default dataPegawaiController;
