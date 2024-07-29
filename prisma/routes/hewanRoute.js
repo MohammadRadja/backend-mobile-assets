@@ -96,7 +96,7 @@ router.delete(
 /* Routes untuk Pemilik */
 // GET - READ
 router.post(
-  "/pemilik/hewan",
+  "/pemilik/hewan/",
   logRequest,
   authenticateToken,
   isOwner,

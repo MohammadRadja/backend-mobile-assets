@@ -202,22 +202,20 @@ const hewanController = {
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
+      const idPemilik = user.id_pemilik; // Ambil ID dari user yang sudah terautentikasi
+      if (!idPemilik) {
+        console.log("Missing id_pemilik in user object.");
+        return res
+          .status(400)
+          .json({ success: false, message: "ID pemilik tidak ditemukan." });
+      }
 
       const { action, data } = req.body;
       console.log("Received action:", action); // Log action
       console.log("Request data:", data); // Log data request
 
       if (action === "read") {
-        const idPemilik = user.id; // Ambil id_pemilik dari user
         console.log("Fetching hewan for id_pemilik:", idPemilik);
-
-        if (!idPemilik) {
-          console.log("Missing id_pemilik in user object.");
-          return res
-            .status(400)
-            .json({ success: false, message: "ID pemilik tidak ditemukan." });
-        }
-
         const result = await prisma.hewan.findMany({
           orderBy: {
             id_hewan: "asc",

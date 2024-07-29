@@ -9,6 +9,7 @@ export const generateToken = (user) => {
   let userId;
   let username;
   let role;
+
   if (user.id_admin) {
     userId = user.id_admin;
     username = user.username;
@@ -54,17 +55,17 @@ export const authenticateToken = async (req, res, next) => {
     let role;
     if (decoded.role === "admin") {
       user = await prisma.admin.findFirst({
-        where: { username: decoded.username },
+        where: { id_admin: decoded.id },
       });
       role = "admin";
     } else if (decoded.role === "pegawai") {
       user = await prisma.pegawai.findFirst({
-        where: { nama_pegawai: decoded.username },
+        where: { id_pegawai: decoded.id },
       });
       role = "pegawai";
     } else if (decoded.role === "pemilik") {
       user = await prisma.pemilik.findFirst({
-        where: { nama_pemilik: decoded.username },
+        where: { id_pemilik: decoded.id },
       });
       role = "pemilik";
     }

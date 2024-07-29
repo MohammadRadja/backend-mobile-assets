@@ -85,31 +85,28 @@ const dataPegawaiController = {
     console.log("Request received:", req.method, req.path);
     try {
       const { user } = req;
+      console.log("User:", user);
       console.log("User role:", user.role);
+
+      // Memastikan user adalah pegawai
       if (user.role !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
 
-      const idPegawai = parseInt(req.params.id, 10); // Konversi ke integer
-      if (isNaN(idPegawai)) {
-        console.log("Invalid id_pegawai provided:", req.params.id);
-        return res
-          .status(400)
-          .json({ success: false, message: "ID pegawai tidak valid." });
-      }
-
+      const idPegawai = user.id_pegawai; // Ambil ID dari user yang sudah terautentikasi
       const { action, data } = req.body;
       console.log("Action:", action);
       console.log("Data diterima:", data);
+      console.log("ID pegawai yang digunakan:", idPegawai);
       let result;
 
       switch (action) {
         case "read":
           console.log("Fetching data for pegawai ID:", idPegawai);
           result = await prisma.pegawai.findUnique({
-            where: { id_pegawai: idPegawai },
+            where: { id_pegawai: idPegawai }, // Menggunakan id_pegawai dari user yang terautentikasi
           });
           if (!result) {
             console.log("Pegawai not found for ID:", idPegawai);
