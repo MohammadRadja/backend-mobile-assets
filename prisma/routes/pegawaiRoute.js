@@ -3,6 +3,7 @@ import {
   authenticateToken,
   isAdmin,
   isEmployee,
+  isOwner,
 } from "../middlewares/authMiddleware.js";
 import dataPegawaiController from "../controllers/dataPegawaiController.js";
 
@@ -54,4 +55,12 @@ router.put(
   dataPegawaiController.pegawaiCRUDDataPegawai
 );
 
+// Routes untuk Pemilik
+//GET -> READ
+router.post(
+  "/pemilik/pegawai",
+  authenticateToken,
+  isOwner,
+  dataPegawaiController.PemilikReadPegawai
+);
 export default router;

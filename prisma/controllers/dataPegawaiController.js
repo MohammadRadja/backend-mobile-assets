@@ -153,6 +153,48 @@ const dataPegawaiController = {
       return res.status(500).json({ success: false, message: error.message });
     }
   },
+
+  // Pemilik dapat READ data pegawai
+  PemilikReadPegawai: async (req, res) => {
+    console.log("Request received:", req.method, req.path);
+    try {
+      // Pastikan user memiliki peran pegawai
+      const { user } = req;
+      if (user.role !== "pemilik") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Unauthorized access" });
+      }
+
+      const { action, data } = req.body;
+      console.log("Action:", action); // Log data yang diterima
+      console.log("Data diterima:", data); //
+      let result;
+
+      switch (action) {
+        case "read":
+          result = await prisma.pegawai.findMany({
+            orderBy: {
+              id_pegawai: "asc", // Urutkan berdasarkan id_pemilik dalam urutan naik (ascending)
+            },
+          });
+          break;
+
+        default:
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid action" });
+      }
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("Read Pegawai from pemilik - Response status: 500");
+      console.error(
+        "Read Pegawai from pemilik - Response body:",
+        error.message
+      );
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
 };
 
 export default dataPegawaiController;

@@ -48,7 +48,7 @@ router.post(
   dataPemilikController.pegawaiCRUDDataPemilik
 );
 //GET -> READ
-router.get(
+router.post(
   "/pegawai/pemilik",
   authenticateToken,
   isEmployee,

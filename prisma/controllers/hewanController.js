@@ -197,12 +197,15 @@ const hewanController = {
     try {
       const { user } = req;
       console.log("User role:", user.role); // Log role user
+
+      // Validasi role user
       if (user.role !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
-      const idPemilik = user.id_pemilik; // Ambil ID dari user yang sudah terautentikasi
+
+      const idPemilik = user.id; // Ambil ID dari user yang sudah terautentikasi
       if (!idPemilik) {
         console.log("Missing id_pemilik in user object.");
         return res
@@ -214,28 +217,59 @@ const hewanController = {
       console.log("Received action:", action); // Log action
       console.log("Request data:", data); // Log data request
 
-      if (action === "read") {
-        console.log("Fetching hewan for id_pemilik:", idPemilik);
-        const result = await prisma.hewan.findMany({
-          orderBy: {
-            id_hewan: "asc",
-          },
-          where: { id_pemilik: idPemilik },
-          include: {
-            pemilik: true,
-          },
-        });
-
-        return res.status(200).json({ success: true, data: result });
-      } else {
-        console.log("Invalid action:", action); // Log invalid action
+      // Validasi action
+      if (!action) {
+        console.log("Action is missing.");
         return res
           .status(400)
-          .json({ success: false, message: "Invalid action" });
+          .json({ success: false, message: "Action is required." });
+      }
+
+      switch (action) {
+        case "read":
+          // Mencari pemilik
+          const pemilik = await prisma.pemilik.findUnique({
+            where: { id_pemilik: idPemilik },
+          });
+
+          if (!pemilik) {
+            console.log("Pemilik not found for ID:", idPemilik);
+            return res
+              .status(404)
+              .json({ success: false, message: "Pemilik not found." });
+          }
+
+          console.log("Fetching hewan for id_pemilik:", idPemilik);
+          const hewanResult = await prisma.hewan.findMany({
+            orderBy: {
+              id_hewan: "asc",
+            },
+            where: { id_pemilik: idPemilik },
+            include: {
+              pemilik: true,
+            },
+          });
+
+          if (hewanResult.length === 0) {
+            return res.status(404).json({
+              success: false,
+              message: "No hewan found for this pemilik.",
+            });
+          }
+
+          return res.status(200).json({ success: true, data: hewanResult });
+
+        default:
+          console.log("Invalid action:", action); // Log invalid action
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid action" });
       }
     } catch (error) {
       console.error("Error in pemilikReadHewan:", error);
-      return res.status(500).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
   },
 };
