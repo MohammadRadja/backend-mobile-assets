@@ -161,29 +161,34 @@ const dataPemilikController = {
     try {
       // Pastikan user memiliki peran pemilik
       const { user } = req;
+      console.log("User:", user);
+      console.log("User role:", user.role);
       if (user.role !== "pemilik") {
         return res
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
 
-      const id_pemilik = parseInt(req.params.id, 10); // Konversi ke integer
-      if (isNaN(id_pemilik)) {
-        console.log("Invalid id_pemilik provided:", req.params.id);
-        return res
-          .status(400)
-          .json({ success: false, message: "ID Pemilik tidak valid." });
-      }
-
+      // const id_pemilik = parseInt(req.params.id, 10); // Konversi ke integer
+      // if (isNaN(id_pemilik)) {
+      //   console.log("Invalid id_pemilik provided:", req.params.id);
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, message: "ID Pemilik tidak valid." });
+      // }
+      
+      const idPemilik = user.id_pemilik;
       const { action, data } = req.body;
       console.log("Action:", action); // Log data yang diterima
-      console.log("Data diterima:", data); //
+      console.log("Data diterima:", data);
+      console.log("ID pemilik yang digunakan:", idPemilik); //
       let result;
 
       switch (action) {
         case "read":
+          console.log("Fetching data for pemilik ID:", idPemilik);
           result = await prisma.pemilik.findUnique({
-            where: { id_pemilik: id_pemilik },
+            where: { id_pemilik: idPemilik },
           });
           if (!result) {
             console.log("Pemilik not found for ID:", id_pemilik);
