@@ -10,28 +10,31 @@ import dataPegawaiController from "../controllers/dataPegawaiController.js";
 const router = express.Router();
 
 // Routes untuk Admin
-//POST -> CREATE
+// POST -> CREATE
 router.post(
   "/admin/pegawai",
   authenticateToken,
   isAdmin,
   dataPegawaiController.adminCRUDDataPegawai
 );
-//GET -> READ
+
+// GET -> READ
 router.get(
   "/admin/pegawai",
   authenticateToken,
   isAdmin,
   dataPegawaiController.adminCRUDDataPegawai
 );
-//PUT -> UPDATE
+
+// PUT -> UPDATE
 router.put(
   "/admin/pegawai/:id",
   authenticateToken,
   isAdmin,
   dataPegawaiController.adminCRUDDataPegawai
 );
-//DELETE
+
+// DELETE
 router.delete(
   "/admin/pegawai/:id",
   authenticateToken,
@@ -40,14 +43,15 @@ router.delete(
 );
 
 // Routes untuk Pegawai
-//GET -> READ
+// POST -> CREATE (Jika dibutuhkan)
 router.post(
   "/pegawai/pegawai/:id",
   authenticateToken,
   isEmployee,
   dataPegawaiController.pegawaiCRUDDataPegawai
 );
-//PUT -> UPDATE
+
+// PUT -> UPDATE
 router.put(
   "/pegawai/pegawai/:id",
   authenticateToken,
@@ -56,11 +60,12 @@ router.put(
 );
 
 // Routes untuk Pemilik
-//GET -> READ
-router.post(
+// GET -> READ
+router.get(
   "/pemilik/pegawai",
   authenticateToken,
   isOwner,
   dataPegawaiController.PemilikReadPegawai
 );
+
 export default router;

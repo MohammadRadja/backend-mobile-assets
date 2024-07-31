@@ -158,7 +158,7 @@ const dataPegawaiController = {
   PemilikReadPegawai: async (req, res) => {
     console.log("Request received:", req.method, req.path);
     try {
-      // Pastikan user memiliki peran pegawai
+      // Pastikan user memiliki peran pemilik
       const { user } = req;
       if (user.role !== "pemilik") {
         return res

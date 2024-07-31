@@ -197,6 +197,7 @@ const hewanController = {
     try {
       const { user } = req;
       console.log("User role:", user.role); // Log role user
+      console.log("Owner ID", user.id_pemilik); // Log ID user
 
       // Validasi role user
       if (user.role !== "pemilik") {
@@ -204,8 +205,7 @@ const hewanController = {
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
-
-      const idPemilik = user.id; // Ambil ID dari user yang sudah terautentikasi
+      const idPemilik = user.id_pemilik; // Mendapatkan id_pemilik dari query
       if (!idPemilik) {
         console.log("Missing id_pemilik in user object.");
         return res

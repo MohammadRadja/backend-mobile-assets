@@ -45,11 +45,12 @@ const dokterController = {
           });
           break;
 
-        case "delete":
-          result = await prisma.doctor.delete({
-            where: { id_dokter: data.id_dokter },
-          });
-          break;
+          case "delete":
+            result = await prisma.dokter.delete({
+              where: { id_dokter: data.id_dokter },
+            });
+            break;
+          
 
         default:
           return res

@@ -93,6 +93,7 @@ const PemilikLogin = async (req, res) => {
       success: true,
       data: {
         role: "pemilik",
+        id_pemilik: pemilik.id_pemilik,
         user: {
           username: pemilik.username,
           jabatan: pemilik.jabatan,
