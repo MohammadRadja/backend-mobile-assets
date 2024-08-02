@@ -205,7 +205,7 @@ const hewanController = {
           .status(403)
           .json({ success: false, message: "Unauthorized access" });
       }
-      const idPemilik = user.id_pemilik; // Mendapatkan id_pemilik dari query
+      const idPemilik = parseInt(req.params.id, 10);
       if (!idPemilik) {
         console.log("Missing id_pemilik in user object.");
         return res
@@ -214,8 +214,8 @@ const hewanController = {
       }
 
       const { action, data } = req.body;
-      console.log("Received action:", action); // Log action
-      console.log("Request data:", data); // Log data request
+      console.log("Action:", action); // Log action
+      console.log("Data diterima:", data); // Log data request
 
       // Validasi action
       if (!action) {

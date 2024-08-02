@@ -96,14 +96,10 @@ router.delete(
 /* Routes untuk Pemilik */
 // GET - READ
 router.post(
-  "/pemilik/hewan/",
+  "/pemilik/hewan",
   logRequest,
   authenticateToken,
   isOwner,
-  hewanController.pemilikReadHewan,
-  (req, res) => {
-    console.log("Pemilik GET /pemilik/hewan");
-    res.json({ message: "Data hewan berhasil diambil" });
-  }
+  hewanController.pemilikReadHewan
 );
 export default router;
