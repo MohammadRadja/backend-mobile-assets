@@ -23,8 +23,8 @@ const dataPetugasController = {
       }
 
       const { action, data } = req.body;
-      console.log("Action:", action); // Log data yang diterima
-      console.log("Data diterima:", data);
+      console.log("Action:", action); // Log action yang diterima
+      console.log("Data diterima:", data); // Log data yang diterima
       let result;
 
       // Menentukan tindakan berdasarkan action yang diterima
@@ -55,8 +55,9 @@ const dataPetugasController = {
           break;
 
         case "read":
-          // Mengambil data manajer
+          // Mengambil semua data petugas
           result = await prisma.user.findMany({
+            where: { jabatan: "petugas" },
             orderBy: { id_user: "asc" },
             select: {
               id_user: true,
@@ -68,31 +69,48 @@ const dataPetugasController = {
           break;
 
         case "update":
-          try {
-            result = await prisma.user.update({
-              where: { id_user: data.id_user },
-              data: { ...data },
-            });
-            return res.status(200).json({
-              success: true,
-              message: "Update Pegawai Sukses",
-              data: result,
-            });
-          } catch (error) {
-            console.error("Error updating user:", error);
-            return res.status(500).json({
-              success: false,
-              message: "Terjadi kesalahan di server",
-            });
-          }
-          break;
-
-        case "delete":
-          result = await prisma.user.deleteMany({
+          // Cek apakah petugas dengan ID yang diberikan ada
+          const existingUser = await prisma.user.findUnique({
             where: { id_user: data.id_user },
           });
-          console.log("Delete Pemilik - Response status: 200");
-          console.log("Delete Pemilik - Response body:", result);
+
+          if (!existingUser) {
+            return res.status(404).json({
+              success: false,
+              message: "Petugas tidak ditemukan",
+            });
+          }
+
+          // Update data petugas
+          result = await prisma.user.update({
+            where: { id_user: data.id_user },
+            data: { ...data },
+          });
+          return res.status(200).json({
+            success: true,
+            message: "Update Petugas Sukses",
+            data: result,
+          });
+
+        case "delete":
+          // Cek apakah petugas dengan ID yang diberikan ada
+          const userToDelete = await prisma.user.findUnique({
+            where: { id_user: data.id_user },
+          });
+
+          if (!userToDelete) {
+            return res.status(404).json({
+              success: false,
+              message: "Petugas tidak ditemukan",
+            });
+          }
+
+          // Hapus data petugas
+          result = await prisma.user.delete({
+            where: { id_user: data.id_user },
+          });
+          console.log("Delete Petugas - Response status: 200");
+          console.log("Delete Petugas - Response body:", result);
           break;
 
         default:
@@ -102,8 +120,11 @@ const dataPetugasController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("CRUD Pemilik dari Admin - Response status: 500");
-      console.error("CRUD Pemilik dari Admin - Response body:", error.message);
+      console.error("CRUD Petugas dari Manajer - Response status: 500");
+      console.error(
+        "CRUD Petugas dari Manajer - Response body:",
+        error.message
+      );
       return res.status(500).json({ success: false, message: error.message });
     }
   },
