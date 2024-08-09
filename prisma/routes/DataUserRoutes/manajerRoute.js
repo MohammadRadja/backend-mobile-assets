@@ -4,40 +4,16 @@ import {
   isManager,
   isOfficer,
   isEmployee,
-} from "../middlewares/authMiddleware.js";
-import dataManajerController from "../controllers/dataManajerController.js";
+} from "../../middlewares/authMiddleware.js";
+import dataManajerController from "../../controllers/dataUserControllers/dataManajerController.js";
 
 const router = express.Router();
-
 /**
  * @route POST /manajer/manajer
- * @desc Manajer: Membuat data manajer baru
+ * @desc Manajer: Mendapatkan daftar data manajer berdasarkan ID Manager
  * @access Private (Manajer)
  */
 router.post(
-  "/manajer/manajer",
-  authenticateToken,
-  isManager,
-  async (req, res, next) => {
-    try {
-      const result = await dataManajerController.ManajerCRUDDataManajer(
-        req,
-        res
-      );
-      console.log("Data manajer berhasil dibuat oleh manajer:", result);
-    } catch (error) {
-      console.error("Gagal membuat data manajer oleh manajer:", error);
-      next(error);
-    }
-  }
-);
-
-/**
- * @route GET /manajer/manajer
- * @desc Manajer: Mendapatkan daftar data manajer
- * @access Private (Manajer)
- */
-router.get(
   "/manajer/manajer",
   authenticateToken,
   isManager,
@@ -73,29 +49,6 @@ router.put(
       console.log("Data manajer berhasil diperbarui oleh manajer:", result);
     } catch (error) {
       console.error("Gagal memperbarui data manajer oleh manajer:", error);
-      next(error);
-    }
-  }
-);
-
-/**
- * @route DELETE /manajer/manajer/:id
- * @desc Manajer: Menghapus data manajer
- * @access Private (Manajer)
- */
-router.delete(
-  "/manajer/manajer/:id",
-  authenticateToken,
-  isManager,
-  async (req, res, next) => {
-    try {
-      const result = await dataManajerController.ManajerCRUDDataManajer(
-        req,
-        res
-      );
-      console.log("Data manajer berhasil dihapus oleh manajer:", result);
-    } catch (error) {
-      console.error("Gagal menghapus data manajer oleh manajer:", error);
       next(error);
     }
   }

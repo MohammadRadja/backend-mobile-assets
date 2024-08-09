@@ -110,13 +110,21 @@ const forgotUser = async (username) => {
 
 // Handler untuk reset password
 const handleForgotPassword = async (req, res) => {
-  const { username, newPassword } = req.body;
+  const { username, newPassword, confirmPassword } = req.body;
 
   // Validasi input
-  if (!newPassword || !username) {
+  if (!newPassword || !confirmPassword || !username) {
     return res.status(400).json({
       success: false,
-      message: "Username dan password baru harus diisi",
+      message: "Username, password baru, dan konfirmasi password harus diisi",
+    });
+  }
+
+  // Validasi kesesuaian password baru dan konfirmasi
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Password baru dan konfirmasi password tidak cocok",
     });
   }
 
@@ -142,9 +150,10 @@ const handleForgotPassword = async (req, res) => {
     console.log(
       `Password berhasil diperbarui untuk pengguna: ${user.username}`
     );
-    return res
-      .status(200)
-      .json({ success: true, message: "Password berhasil diperbarui" });
+    return res.status(200).json({
+      success: true,
+      message: "Password berhasil diperbarui",
+    });
   } catch (error) {
     console.error("Kesalahan saat memperbarui password:", error.message);
     return res.status(500).json({

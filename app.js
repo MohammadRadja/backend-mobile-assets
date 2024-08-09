@@ -1,16 +1,16 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import hewanRoute from "./prisma/routes/hewanRoute.js";
-import obatRoute from "./prisma/routes/obatRoute.js";
-import pembayaranRoute from "./prisma/routes/pembayaranRoute.js";
-import rekammedisRoute from "./prisma/routes/rekammedisRoute.js";
-import resepRoute from "./prisma/routes/resepRoute.js";
-import authRoute from "./prisma/routes/authRoute.js";
-import dokterRoute from "./prisma/routes/dokterRoute.js";
-import appointmentRoute from "./prisma/routes/appointmentRoute.js";
-import dataPemilikRoute from "./prisma/routes/pemilikRoute.js";
-import dataPegawaiRoute from "./prisma/routes/pegawaiRoute.js";
+import authRoute from "./prisma/routes/authRoutes/authRoute.js";
+import manajerRoute from "./prisma/routes/DataUserRoutes/manajerRoute.js";
+import pegawaiRoute from "./prisma/routes/DataUserRoutes/pegawaiRoute.js";
+import petugasRoute from "./prisma/routes/DataUserRoutes/petugasRoute.js";
+import barangRoute from "./prisma/routes/barangRoute.js";
+import cabangRoute from "./prisma/routes/cabangRoute.js";
+import detailRequestRoute from "./prisma/routes/detailRequestRoute.js";
+import requestRoute from "./prisma/routes/requestRoute.js";
+import satuanBarangRoute from "./prisma/routes/satuanbarangRoute.js";
+import transaksiRoute from "./prisma/routes/transaksiRoute.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -32,16 +32,16 @@ app.use(express.json());
 app.use("/", authRoute);
 
 // Use other routes
-app.use("/", hewanRoute);
-app.use("/", obatRoute);
-app.use("/", pembayaranRoute);
-app.use("/", rekammedisRoute);
-app.use("/", resepRoute);
-app.use("/", resepRoute);
-app.use("/", dokterRoute);
-app.use("/", appointmentRoute);
-app.use("/", dataPemilikRoute);
-app.use("/", dataPegawaiRoute);
+app.use("/", authRoute);
+app.use("/", manajerRoute);
+app.use("/", pegawaiRoute);
+app.use("/", petugasRoute);
+app.use("/", barangRoute);
+app.use("/", cabangRoute);
+app.use("/", detailRequestRoute);
+app.use("/", requestRoute);
+app.use("/", satuanBarangRoute);
+app.use("/", transaksiRoute);
 
 // Middleware logging
 app.use((req, res, next) => {

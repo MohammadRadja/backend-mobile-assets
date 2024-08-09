@@ -4,8 +4,8 @@ import {
   isManager,
   isOfficer,
   isEmployee,
-} from "../middlewares/authMiddleware.js";
-import dataPegawaiController from "../controllers/dataPegawaiController.js";
+} from "../../middlewares/authMiddleware.js";
+import dataPegawaiController from "../../controllers/dataUserControllers/dataPegawaiController.js";
 
 const router = express.Router();
 

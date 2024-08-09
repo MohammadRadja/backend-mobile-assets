@@ -39,6 +39,46 @@ const formatDate = (date) => {
   return `${day}-${month}-${year}`;
 };
 
+/**
+ * Menghasilkan kode request otomatis.
+ * @returns {string} - Kode request dalam format REQYYMMNNNN.
+ */
+const generateRequestCode = async () => {
+  const now = new Date();
+  const year = now.getFullYear().toString().slice(-2);
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const date = String(now.getDate()).padStart(2, "0"); // Ambil tanggal dan format menjadi dua digit
+
+  let requestCode;
+  let existingRequest;
+  let attempts = 0; // Batasan untuk mencegah loop tak terbatas
+
+  do {
+    // Buat requestCode dengan format baru
+    requestCode = `REQ${year}${month}${date}`;
+
+    // Cek apakah kode request sudah ada
+    existingRequest = await prisma.request.findUnique({
+      where: { kode_request: requestCode },
+    });
+
+    console.log("Checking requestCode:", requestCode); // Log kode yang diperiksa
+    if (existingRequest) {
+      console.log("Kode request sudah ada, menghasilkan yang baru..."); // Log jika kode sudah ada
+    }
+
+    attempts++; // Tambah jumlah percobaan
+    if (attempts > 100) {
+      // Batasi percobaan untuk mencegah loop tak terbatas
+      console.error("Too many attempts to generate a unique request code.");
+      throw new Error("Too many attempts to generate a unique request code.");
+    }
+  } while (existingRequest);
+
+  console.log("Generated unique requestCode:", requestCode); // Log kode yang dihasilkan
+  return requestCode;
+};
+
 const requestController = {
   /**
    * Fungsi untuk mengelola CRUD permintaan oleh admin.
@@ -64,6 +104,10 @@ const requestController = {
 
       switch (action) {
         case "create":
+          // Menghasilkan kode request otomatis
+          const requestCode = await generateRequestCode();
+          console.log("Request Code generated:", requestCode); // Tambahkan log ini
+
           // Validasi input untuk aksi create
           if (
             !data.kode_cabang ||
@@ -80,13 +124,22 @@ const requestController = {
               message: "Field yang diperlukan hilang",
             });
           }
+
+          // Pastikan requestCode tidak kosong setelah di-generate
+          if (!requestCode) {
+            return res.status(400).json({
+              success: false,
+              message: "Kode request tidak dapat dihasilkan",
+            });
+          }
           result = await prisma.request.create({
             data: {
+              kode_request: requestCode,
               kode_cabang: data.kode_cabang,
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: new Date(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              tanggal_request: formatDate(data.tanggal_request),
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,
@@ -164,7 +217,7 @@ const requestController = {
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: new Date(data.tanggal_request),
+              tanggal_request: parseDate(data.tanggal_request),
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,
@@ -256,13 +309,18 @@ const requestController = {
               message: "Field yang diperlukan hilang",
             });
           }
+
+          // Menghasilkan kode request otomatis
+          const requestCode = await generateRequestCode();
+
           result = await prisma.request.create({
             data: {
+              kode_request: requestCode, // Menggunakan kode yang dihasilkan
               kode_cabang: data.kode_cabang,
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: new Date(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              tanggal_request: formatDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,
@@ -340,7 +398,7 @@ const requestController = {
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: new Date(data.tanggal_request),
+              tanggal_request: formatDate(data.tanggal_request),
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,
@@ -426,13 +484,18 @@ const requestController = {
               message: "Field yang diperlukan hilang",
             });
           }
+
+          // Menghasilkan kode request otomatis
+          const requestCode = await generateRequestCode();
+
           result = await prisma.request.create({
             data: {
+              kode_request: requestCode, // Menggunakan kode yang dihasilkan
               kode_cabang: data.kode_cabang,
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: new Date(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              tanggal_request: formatDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,
@@ -511,7 +574,7 @@ const requestController = {
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: new Date(data.tanggal_request),
+              tanggal_request: formatDate(data.tanggal_request),
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,

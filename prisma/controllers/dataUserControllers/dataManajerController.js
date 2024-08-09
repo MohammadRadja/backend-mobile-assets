@@ -23,37 +23,16 @@ const dataManajerController = {
           .json({ success: false, message: "Akses ditolak" });
       }
 
+      const idManager = user.id_user || "";
       const { action, data } = req.body;
       console.log("Action:", action); // Log data yang diterima
       console.log("Data diterima:", data);
       let result;
 
       switch (action) {
-        case "create":
-          const existUsername = await prisma.user.findFirst({
-            where: { username: data.username },
-          });
-
-          if (existUsername) {
-            return res.status(400).json({
-              success: false,
-              message: "Username Pegawai sudah ada",
-            });
-          }
-
-          const hash = await bcrypt.hash(data.password, 10);
-          result = await prisma.user.create({
-            data: {
-              username: data.username,
-              password: hash,
-              jabatan: data.jabatan,
-            },
-          });
-          break;
-
         case "read":
           result = await prisma.user.findMany({
-            where: { jabatan: "manajer" },
+            where: { id_user: idManager },
             orderBy: { id_user: "asc" },
           });
           break;
@@ -68,12 +47,6 @@ const dataManajerController = {
           result = await prisma.user.update({
             where: { id_user: data.id_user },
             data: updateData,
-          });
-          break;
-
-        case "delete":
-          result = await prisma.user.delete({
-            where: { id_user: data.id_user },
           });
           break;
 
@@ -110,12 +83,6 @@ const dataManajerController = {
       const result = await prisma.user.findMany({
         where: { jabatan: "manajer" },
         orderBy: { id_user: "asc" }, // Mengurutkan berdasarkan id_user
-        select: {
-          id_user: true,
-          nama: true,
-          email: true,
-          jabatan: true,
-        },
       });
 
       console.log("Data Manajer:", result);
@@ -145,12 +112,6 @@ const dataManajerController = {
       const result = await prisma.user.findMany({
         where: { jabatan: "manajer" },
         orderBy: { id_user: "asc" }, // Mengurutkan berdasarkan id_user
-        select: {
-          id_user: true,
-          nama: true,
-          email: true,
-          jabatan: true,
-        },
       });
 
       console.log("Data Manajer:", result);

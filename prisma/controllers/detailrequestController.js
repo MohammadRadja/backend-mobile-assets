@@ -1,3 +1,7 @@
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
 /**
  * Controller untuk mengelola data detail request.
  */
@@ -102,12 +106,15 @@ const detailRequestController = {
 
       // Mengambil data detail request
       const result = await prisma.detailRequest.findMany({
+        where: {
+          id_user: idPegawai,
+        },
         orderBy: {
           kode_request: "asc", // Mengurutkan berdasarkan kode_request
         },
         select: {
           kode_request: true,
-          id_user: idPegawai,
+          id_user: true,
           id_barang: true,
           status: true,
           qty_request: true,

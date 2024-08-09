@@ -49,21 +49,22 @@ const dataPetugasController = {
             data: {
               username: data.username,
               password: hash,
-              jabatan: data.jabatan,
+              jabatan: "petugas",
             },
           });
           break;
 
         case "read":
-          // Mengambil semua data petugas
+          // Mengambil data manajer
           result = await prisma.user.findMany({
-            where: {
-              jabatan: "petugas",
-            },
-            orderBy: {
-              id_user: "asc", // Urutkan berdasarkan id_user dalam urutan naik
+            orderBy: { id_user: "asc" },
+            select: {
+              id_user: true,
+              username: true,
+              jabatan: true,
             },
           });
+          console.log("Data Petugas:", result);
           break;
 
         case "update":

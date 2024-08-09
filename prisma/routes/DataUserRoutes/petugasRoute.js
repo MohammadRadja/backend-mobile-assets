@@ -4,8 +4,8 @@ import {
   isManager,
   isOfficer,
   isEmployee,
-} from "../middlewares/authMiddleware.js";
-import dataPetugasController from "../controllers/dataPetugasController.js";
+} from "../../middlewares/authMiddleware.js";
+import dataPetugasController from "../../controllers/dataUserControllers/dataPetugasController.js";
 
 const router = express.Router();
 
@@ -34,11 +34,11 @@ router.post(
 );
 
 /**
- * @route GET /Manager
+ * @route POST /Manager
  * @desc Manager: Mendapatkan daftar data petugas
  * @access Private (manajer)
  */
-router.get(
+router.post(
   "/manajer/petugas",
   authenticateToken,
   isManager,

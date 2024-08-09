@@ -62,3 +62,25 @@ model user {
   jabatan   String
   request  request[] 
 }
+
+model Transaksi {
+  kode_request  String @id
+  tanggal_request DateTime
+  nama_cabang   String
+  total_request Int
+
+  @@map("Transaksi") 
+}
+	
+model DetailRequest {
+  kode_request String @id
+  id_user      String  
+  id_barang    String
+  status       String
+  qty_request  Int
+  subtotal     Float
+  @@map("DetailRequest") 
+}
+
+
+
