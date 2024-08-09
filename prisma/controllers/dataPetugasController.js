@@ -202,34 +202,23 @@ const dataPetugasController = {
           .status(403)
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
+      // Mengambil data manajer
+      const result = await prisma.user.findMany({
+        where: { jabatan: "petugas" },
+        orderBy: { id_user: "asc" }, // Mengurutkan berdasarkan id_user
+        select: {
+          id_user: true,
+          nama: true,
+          email: true,
+          jabatan: true,
+        },
+      });
 
-      const { action, data } = req.body;
-      console.log("Action:", action); // Log data yang diterima
-      console.log("Data diterima:", data);
-      let result;
+      console.log("Data Petugas:", result);
 
-      // Menentukan tindakan berdasarkan action yang diterima
-      switch (action) {
-        case "read":
-          // Mengambil semua data petugas
-          result = await prisma.user.findMany({
-            where: {
-              jabatan: "petugas",
-            },
-            orderBy: {
-              id_user: "asc", // Urutkan berdasarkan id_user dalam urutan naik
-            },
-          });
-          break;
-
-        default:
-          return res
-            .status(400)
-            .json({ success: false, message: "Aksi tidak valid" });
-      }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("Error di pegawaiReadDataPetugas:", error);
+      console.error("Error in Pegawai Read Data Petugas:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },

@@ -96,42 +96,33 @@ const dataManajerController = {
    * @param {Object} res - Response object
    */
   petugasReadDataManajer: async (req, res) => {
-    console.log("Request received:", req.method, req.path);
     try {
       const { user } = req;
-      console.log("User:", user);
+
+      // Memastikan pengguna adalah petugas
       if (user.jabatan !== "petugas") {
         return res
           .status(403)
           .json({ success: false, message: "Akses ditolak" });
       }
 
-      const { action } = req.body;
-      console.log("Action:", action); // Log data yang diterima
-      let result;
+      // Mengambil data manajer
+      const result = await prisma.user.findMany({
+        where: { jabatan: "manajer" },
+        orderBy: { id_user: "asc" }, // Mengurutkan berdasarkan id_user
+        select: {
+          id_user: true,
+          nama: true,
+          email: true,
+          jabatan: true,
+        },
+      });
 
-      switch (action) {
-        case "read":
-          result = await prisma.user.findMany({
-            where: { jabatan: "manajer" },
-            orderBy: { id_user: "asc" },
-          });
-          break;
-
-        default:
-          console.log("Aksi tidak valid diterima:", action);
-          return res
-            .status(400)
-            .json({ success: false, message: "Aksi tidak valid" });
-      }
+      console.log("Data Manajer:", result);
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("Read Manajer dari Petugas - Response status: 500");
-      console.error(
-        "Read Manajer dari Petugas - Response body:",
-        error.message
-      );
+      console.error("Error in Petugas Read Data Manajer:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },
@@ -142,7 +133,6 @@ const dataManajerController = {
    * @param {Object} res - Response object
    */
   pegawaiReadDataManajer: async (req, res) => {
-    console.log("Request received:", req.method, req.path);
     try {
       const { user } = req;
       if (user.jabatan !== "pegawai") {
@@ -151,30 +141,23 @@ const dataManajerController = {
           .json({ success: false, message: "Akses ditolak" });
       }
 
-      const { action } = req.body;
-      console.log("Action:", action); // Log data yang diterima
-      let result;
+      // Mengambil data manajer
+      const result = await prisma.user.findMany({
+        where: { jabatan: "manajer" },
+        orderBy: { id_user: "asc" }, // Mengurutkan berdasarkan id_user
+        select: {
+          id_user: true,
+          nama: true,
+          email: true,
+          jabatan: true,
+        },
+      });
 
-      switch (action) {
-        case "read":
-          result = await prisma.user.findMany({
-            where: { jabatan: "manajer" },
-            orderBy: { id_user: "asc" },
-          });
-          break;
+      console.log("Data Manajer:", result);
 
-        default:
-          return res
-            .status(400)
-            .json({ success: false, message: "Aksi tidak valid" });
-      }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("Read Manajer dari Pegawai - Response status: 500");
-      console.error(
-        "Read Manajer dari Pegawai - Response body:",
-        error.message
-      );
+      console.error("Error in Pegawai Read Data Manajer:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },

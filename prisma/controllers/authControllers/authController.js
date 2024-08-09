@@ -28,9 +28,6 @@ const loginUser = async (username, password) => {
     user: {
       username: user.username,
       jabatan: user.jabatan,
-      alamat: user.alamat,
-      no_telp: user.no_telp,
-      email: user.email,
     },
     token,
     expiresIn: "10800",
@@ -65,22 +62,10 @@ const handleLogin = async (req, res) => {
 };
 
 // Fungsi pendaftaran umum
-const registerUser = async (
-  username,
-  password,
-  jabatan,
-  alamat,
-  no_telp,
-  email
-) => {
+const registerUser = async (username, password, jabatan) => {
   const existingUser = await prisma.user.findUnique({ where: { username } });
   if (existingUser) {
     throw new Error("Username sudah terdaftar");
-  }
-
-  const existingEmail = await prisma.user.findUnique({ where: { email } });
-  if (existingEmail) {
-    throw new Error("Email sudah terdaftar");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -89,41 +74,28 @@ const registerUser = async (
       username,
       password: hashedPassword,
       jabatan,
-      alamat,
-      no_telp,
-      email,
+      // Tambahkan field lain yang diperlukan
     },
   });
 
   return {
     username: newUser.username,
     jabatan: newUser.jabatan,
-    alamat: newUser.alamat,
-    no_telp: newUser.no_telp,
-    email: newUser.email,
   };
 };
 
 // Handler untuk pendaftaran
 const handleRegister = async (req, res) => {
-  const { username, password, alamat, no_telp, email } = req.body;
+  const { username, password, jabatan } = req.body;
 
-  if (!username || !password || !alamat || !no_telp || !email) {
+  if (!username || !password || !jabatan) {
     return res
       .status(400)
       .json({ success: false, message: "Semua kolom harus diisi" });
   }
 
   try {
-    const jabatan = "pemilik"; // Jabatan default
-    const userData = await registerUser(
-      username,
-      password,
-      jabatan,
-      alamat,
-      no_telp,
-      email
-    );
+    const userData = await registerUser(username, password, jabatan);
     return res.status(201).json({ success: true, data: userData });
   } catch (error) {
     console.error("Kesalahan saat pendaftaran:", error);
@@ -131,47 +103,32 @@ const handleRegister = async (req, res) => {
   }
 };
 
-// Fungsi untuk mencari pengguna berdasarkan username, no_telp, atau email
-const forgotUser = async (username, no_telp, email) => {
-  const whereCondition = username
-    ? { username }
-    : no_telp
-    ? { no_telp }
-    : { email };
-
-  console.log("Mencari pengguna dengan kondisi:", whereCondition); // Tambahkan log ini
-  return await prisma.user.findFirst({ where: whereCondition });
+// Fungsi untuk mencari pengguna berdasarkan username
+const forgotUser = async (username) => {
+  return await prisma.user.findUnique({ where: { username } });
 };
+
 // Handler untuk reset password
 const handleForgotPassword = async (req, res) => {
-  const { username, no_telp, email, newPassword } = req.body;
+  const { username, newPassword } = req.body;
 
   // Validasi input
-  if (!newPassword || (!username && !no_telp && !email)) {
-    console.log(`Permintaan gagal: Field yang diperlukan tidak lengkap.`);
+  if (!newPassword || !username) {
     return res.status(400).json({
       success: false,
-      message: "Username, no_telp, email, dan password baru harus diisi",
+      message: "Username dan password baru harus diisi",
     });
   }
 
   try {
-    // Mencari pengguna berdasarkan detail yang diberikan
-    const user = await forgotUser(username, no_telp, email);
+    // Mencari pengguna berdasarkan username
+    const user = await forgotUser(username);
 
-    // Validasi pengguna ditemukan dan memiliki jabatan pemilik
+    // Validasi pengguna ditemukan
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "Pengguna tidak ditemukan atau detail tidak cocok",
-      });
-    }
-
-    if (user.jabatan !== "pemilik") {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Akses ditolak: hanya pengguna pemilik yang dapat mereset password",
       });
     }
 
@@ -197,15 +154,15 @@ const handleForgotPassword = async (req, res) => {
   }
 };
 
-// Pemilik Register
-const PemilikRegister = (req, res) => handleRegister(req, res);
+// Pegawai Register
+const PegawaiRegister = (req, res) => handleRegister(req, res);
 
-// Pemilik Forgot Password
-const PemilikForgotPassword = (req, res) => handleForgotPassword(req, res);
+// Pegawai Forgot Password
+const PegawaiForgotPassword = (req, res) => handleForgotPassword(req, res);
 
 // Ekspor semua fungsi
 export default {
   handleLogin,
-  PemilikRegister,
-  PemilikForgotPassword,
+  PegawaiRegister,
+  PegawaiForgotPassword,
 };

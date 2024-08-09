@@ -1,6 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+/**
+ * Mengonversi string tanggal ke format ISO-8601.
+ * @param {string} dateStr - String tanggal dalam format DD-MM-YYYY atau ISO-8601.
+ * @returns {string} - Tanggal dalam format ISO-8601.
+ * @throws {Error} - Jika format tanggal tidak valid.
+ */
 const parseDate = (dateStr) => {
   // Jika sudah dalam format ISO-8601, langsung kembalikan
   if (!/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
@@ -21,7 +27,11 @@ const parseDate = (dateStr) => {
   return date.toISOString();
 };
 
-// Fungsi untuk memformat tanggal ke DD-MM-YYYY
+/**
+ * Memformat tanggal ke format DD-MM-YYYY.
+ * @param {Date} date - Objek tanggal.
+ * @returns {string} - Tanggal dalam format DD-MM-YYYY.
+ */
 const formatDate = (date) => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -29,25 +39,25 @@ const formatDate = (date) => {
   return `${day}-${month}-${year}`;
 };
 
-const appointmentController = {
+const requestController = {
   /**
-   * Fungsi untuk mengelola CRUD Appointment oleh Admin
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
+   * Fungsi untuk mengelola CRUD permintaan oleh admin.
+   * @param {Object} req - Objek request.
+   * @param {Object} res - Objek response.
    */
-  adminCRUDAppointment: async (req, res) => {
+  manajerCRUDRequest: async (req, res) => {
     try {
       const { user } = req;
 
-      // Memeriksa apakah pengguna adalah admin
-      if (user.jabatan !== "admin") {
+      // Memeriksa apakah pengguna adalah manajer
+      if (user.jabatan !== "manajer") {
         return res
           .status(403)
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
       const { action, data } = req.body;
-      console.log("Action diterima:", action); // Log action yang diterima
+      console.log("Aksi diterima:", action); // Log aksi yang diterima
       console.log("Data diterima:", data); // Log data yang diterima
 
       let result;
@@ -56,107 +66,140 @@ const appointmentController = {
         case "create":
           // Validasi input untuk aksi create
           if (
+            !data.kode_cabang ||
             !data.id_user ||
-            !data.id_hewan ||
-            !data.id_dokter ||
-            !data.tgl_appointment
+            !data.id_barang ||
+            !data.id_satuan ||
+            !data.tanggal_request ||
+            !data.jumlah_barang ||
+            !data.keperluan ||
+            !data.status
           ) {
             return res.status(400).json({
               success: false,
               message: "Field yang diperlukan hilang",
             });
           }
-          result = await prisma.appointment.create({
+          result = await prisma.request.create({
             data: {
+              kode_cabang: data.kode_cabang,
               id_user: data.id_user,
-              id_hewan: data.id_hewan,
-              id_dokter: data.id_dokter,
-              tgl_appointment: parseDate(data.tgl_appointment),
-              catatan: data.catatan,
+              id_barang: data.id_barang,
+              id_satuan: data.id_satuan,
+              tanggal_request: new Date(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              department: data.department,
+              jumlah_barang: data.jumlah_barang,
+              keperluan: data.keperluan,
+              status: data.status,
             },
           });
-          console.log("Appointment berhasil dibuat:", result);
+          console.log("Permintaan berhasil dibuat:", result);
           break;
 
         case "read":
-          // Membaca data appointment
-          result = await prisma.appointment.findMany({
+          // Membaca data permintaan
+          result = await prisma.request.findMany({
             orderBy: {
-              id_appointment: "asc",
+              kode_request: "asc",
             },
             select: {
-              id_appointment: true,
+              kode_request: true,
+              kode_cabang: true,
               id_user: true,
               user: {
                 select: {
                   username: true,
                 },
               },
-              id_hewan: true,
-              hewan: {
+              id_barang: true,
+              barang: {
                 select: {
-                  nama_hewan: true,
+                  nama_barang: true,
                 },
               },
-              id_dokter: true,
-              dokter: {
+              id_satuan: true,
+              satuan_barang: {
                 select: {
-                  nama_dokter: true,
+                  nama_satuan: true,
                 },
               },
-              tgl_appointment: true,
-              catatan: true,
+              tanggal_request: true,
+              department: true,
+              jumlah_barang: true,
+              keperluan: true,
+              status: true,
             },
           });
-          result = result.map((appointment) => ({
-            ...appointment,
-            tgl_appointment: formatDate(new Date(appointment.tgl_appointment)),
-          }));
-          console.log("Data Appointment:", result);
+          console.log("Data Permintaan:", result);
           break;
 
         case "update":
           // Validasi input untuk aksi update
-          if (!data.id_appointment) {
+          if (!data.kode_request) {
             return res
               .status(400)
-              .json({ success: false, message: "ID Appointment hilang" });
+              .json({ success: false, message: "Kode permintaan hilang" });
           }
 
           // Memeriksa apakah rekaman ada sebelum diperbarui
-          const appointmentToUpdate = await prisma.appointment.findUnique({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
+          const requestToUpdate = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
           });
 
-          if (!appointmentToUpdate) {
+          if (!requestToUpdate) {
             return res
               .status(404)
-              .json({ success: false, message: "Appointment tidak ditemukan" });
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
           }
           console.log(
-            "Appointment yang akan diperbarui ditemukan:",
-            appointmentToUpdate
+            "Permintaan yang akan diperbarui ditemukan:",
+            requestToUpdate
           );
 
-          // Perbarui data appointment
-          result = await prisma.appointment.update({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
+          // Perbarui data permintaan
+          result = await prisma.request.update({
+            where: { kode_request: data.kode_request },
             data: {
-              id_user: data.id_user, // Tidak perlu parse ke integer jika id_user adalah string
-              id_hewan: data.id_hewan, // Tidak perlu parse ke integer jika id_hewan adalah string
-              id_dokter: data.id_dokter, // Tidak perlu parse ke integer jika id_dokter adalah string
-              tgl_appointment: parseDate(data.tgl_appointment), // Pastikan parseDate mengembalikan format yang benar
-              catatan: data.catatan,
+              kode_cabang: data.kode_cabang,
+              id_user: data.id_user,
+              id_barang: data.id_barang,
+              id_satuan: data.id_satuan,
+              tanggal_request: new Date(data.tanggal_request),
+              department: data.department,
+              jumlah_barang: data.jumlah_barang,
+              keperluan: data.keperluan,
+              status: data.status,
             },
           });
-
           console.log("Update berhasil:", result);
           break;
 
         case "delete":
-          // Menghapus appointment
-          result = await prisma.appointment.delete({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
+          // Validasi input untuk aksi delete
+          if (!data.kode_request) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Kode permintaan hilang" });
+          }
+
+          // Memeriksa apakah rekaman ada sebelum dihapus
+          const requestToDelete = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
+          });
+
+          if (!requestToDelete) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
+          }
+          console.log(
+            "Permintaan yang akan dihapus ditemukan:",
+            requestToDelete
+          );
+
+          // Menghapus permintaan
+          result = await prisma.request.delete({
+            where: { kode_request: data.kode_request },
           });
           console.log("Delete berhasil:", result);
           break;
@@ -168,13 +211,188 @@ const appointmentController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("Error di adminCRUDAppointment:", error);
+      console.error("Error di manajerCRUDRequest:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },
 
-  // Pegawai: CRUD semua tabel kecuali admin
-  pegawaiCRUDAppointment: async (req, res) => {
+  /**
+   * Fungsi untuk mengelola CRUD permintaan oleh petugas.
+   * @param {Object} req - Objek request.
+   * @param {Object} res - Objek response.
+   */
+  petugasCRUDRequest: async (req, res) => {
+    try {
+      const { user } = req;
+
+      // Verifikasi peran pengguna
+      if (user.jabatan !== "petugas") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses tidak sah" });
+      }
+
+      const { action, data } = req.body;
+      console.log("Aksi diterima:", action); // Log aksi yang diterima
+      console.log("Data diterima:", data); // Log data yang diterima
+
+      let result;
+
+      switch (action) {
+        case "create":
+          // Validasi input untuk aksi create
+          if (
+            !data.kode_cabang ||
+            !data.id_user ||
+            !data.id_barang ||
+            !data.id_satuan ||
+            !data.tanggal_request ||
+            !data.jumlah_barang ||
+            !data.keperluan ||
+            !data.status
+          ) {
+            return res.status(400).json({
+              success: false,
+              message: "Field yang diperlukan hilang",
+            });
+          }
+          result = await prisma.request.create({
+            data: {
+              kode_cabang: data.kode_cabang,
+              id_user: data.id_user,
+              id_barang: data.id_barang,
+              id_satuan: data.id_satuan,
+              tanggal_request: new Date(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              department: data.department,
+              jumlah_barang: data.jumlah_barang,
+              keperluan: data.keperluan,
+              status: data.status,
+            },
+          });
+          console.log("Permintaan berhasil dibuat:", result);
+          break;
+
+        case "read":
+          // Membaca data permintaan
+          result = await prisma.request.findMany({
+            orderBy: {
+              kode_request: "asc",
+            },
+            select: {
+              kode_request: true,
+              kode_cabang: true,
+              id_user: true,
+              user: {
+                select: {
+                  username: true,
+                },
+              },
+              id_barang: true,
+              barang: {
+                select: {
+                  nama_barang: true,
+                },
+              },
+              id_satuan: true,
+              satuan_barang: {
+                select: {
+                  nama_satuan: true,
+                },
+              },
+              tanggal_request: true,
+              department: true,
+              jumlah_barang: true,
+              keperluan: true,
+              status: true,
+            },
+          });
+          console.log("Data Permintaan:", result);
+          break;
+
+        case "update":
+          // Validasi input untuk aksi update
+          if (!data.kode_request) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Kode permintaan hilang" });
+          }
+
+          // Memeriksa apakah rekaman ada sebelum diperbarui
+          const requestToUpdate = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
+          });
+
+          if (!requestToUpdate) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
+          }
+          console.log(
+            "Permintaan yang akan diperbarui ditemukan:",
+            requestToUpdate
+          );
+
+          // Perbarui data permintaan
+          result = await prisma.request.update({
+            where: { kode_request: data.kode_request },
+            data: {
+              kode_cabang: data.kode_cabang,
+              id_user: data.id_user,
+              id_barang: data.id_barang,
+              id_satuan: data.id_satuan,
+              tanggal_request: new Date(data.tanggal_request),
+              department: data.department,
+              jumlah_barang: data.jumlah_barang,
+              keperluan: data.keperluan,
+              status: data.status,
+            },
+          });
+          console.log("Update berhasil:", result);
+          break;
+
+        case "delete":
+          // Validasi input untuk aksi delete
+          if (!data.kode_request) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Kode permintaan hilang" });
+          }
+
+          // Memeriksa apakah rekaman ada sebelum dihapus
+          const requestToDelete = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
+          });
+
+          if (!requestToDelete) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
+          }
+          console.log(
+            "Permintaan yang akan dihapus ditemukan:",
+            requestToDelete
+          );
+
+          // Menghapus permintaan
+          result = await prisma.request.delete({
+            where: { kode_request: data.kode_request },
+          });
+          console.log("Delete berhasil:", result);
+          break;
+
+        default:
+          return res
+            .status(400)
+            .json({ success: false, message: "Aksi tidak valid" });
+      }
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error di petugasCRUDRequest:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  pegawaiCRUDRequest: async (req, res) => {
     try {
       const { user } = req;
 
@@ -185,152 +403,150 @@ const appointmentController = {
           .json({ success: false, message: "Akses tidak sah" });
       }
 
+      const idPegawai = user.id_user || ""; // Ganti dengan logika yang sesuai jika diperlukan
       const { action, data } = req.body;
-      console.log("Action diterima:", action); // Log action yang diterima
-      console.log("Data diterima:", data); // Log data yang diterima
-
+      console.log("Data diterima:", data);
       let result;
 
       switch (action) {
         case "create":
           // Validasi input untuk aksi create
           if (
+            !data.kode_cabang ||
             !data.id_user ||
-            !data.id_hewan ||
-            !data.id_dokter ||
-            !data.tgl_appointment
+            !data.id_barang ||
+            !data.id_satuan ||
+            !data.tanggal_request ||
+            !data.jumlah_barang ||
+            !data.keperluan ||
+            !data.status
           ) {
             return res.status(400).json({
               success: false,
               message: "Field yang diperlukan hilang",
             });
           }
-          result = await prisma.appointment.create({
+          result = await prisma.request.create({
             data: {
+              kode_cabang: data.kode_cabang,
               id_user: data.id_user,
-              id_hewan: data.id_hewan,
-              id_dokter: data.id_dokter,
-              tgl_appointment: parseDate(data.tgl_appointment),
-              catatan: data.catatan,
+              id_barang: data.id_barang,
+              id_satuan: data.id_satuan,
+              tanggal_request: new Date(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              department: data.department,
+              jumlah_barang: data.jumlah_barang,
+              keperluan: data.keperluan,
+              status: data.status,
             },
           });
-          console.log("Appointment berhasil dibuat:", result);
+          console.log("Permintaan berhasil dibuat:", result);
           break;
 
         case "read":
-          // Membaca data appointment
-          result = await prisma.appointment.findMany({
+          // Membaca data permintaan
+          result = await prisma.request.findMany({
+            where: { id_user: idPegawai },
             orderBy: {
-              id_appointment: "asc",
+              kode_request: "asc",
             },
             select: {
-              id_appointment: true,
+              kode_request: true,
+              kode_cabang: true,
               id_user: true,
               user: {
                 select: {
                   username: true,
                 },
               },
-              id_hewan: true,
-              hewan: {
+              id_barang: true,
+              barang: {
                 select: {
-                  nama_hewan: true,
+                  nama_barang: true,
                 },
               },
-              id_dokter: true,
-              dokter: {
+              id_satuan: true,
+              satuan_barang: {
                 select: {
-                  nama_dokter: true,
+                  nama_satuan: true,
                 },
               },
-              tgl_appointment: true,
-              catatan: true,
+              tanggal_request: true,
+              department: true,
+              jumlah_barang: true,
+              keperluan: true,
+              status: true,
             },
           });
-          result = result.map((appointment) => ({
-            ...appointment,
-            tgl_appointment: formatDate(new Date(appointment.tgl_appointment)),
-          }));
-          console.log("Data Appointment:", result);
+          console.log("Data Permintaan:", result);
           break;
 
         case "update":
           // Validasi input untuk aksi update
-          if (!data.id_appointment) {
+          if (!data.kode_request) {
             return res
               .status(400)
-              .json({ success: false, message: "ID Appointment hilang" });
+              .json({ success: false, message: "Kode permintaan hilang" });
           }
 
           // Memeriksa apakah rekaman ada sebelum diperbarui
-          const appointmentToUpdate = await prisma.appointment.findUnique({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
+          const requestToUpdate = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
           });
 
-          if (!appointmentToUpdate) {
+          if (!requestToUpdate) {
             return res
               .status(404)
-              .json({ success: false, message: "Appointment tidak ditemukan" });
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
           }
           console.log(
-            "Appointment yang akan diperbarui ditemukan:",
-            appointmentToUpdate
+            "Permintaan yang akan diperbarui ditemukan:",
+            requestToUpdate
           );
 
-          // Perbarui data appointment
-          result = await prisma.appointment.update({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
+          // Perbarui data permintaan
+          result = await prisma.request.update({
+            where: { kode_request: data.kode_request },
             data: {
-              id_user: data.id_user, // Tidak perlu parse ke integer jika id_user adalah string
-              id_hewan: data.id_hewan, // Tidak perlu parse ke integer jika id_hewan adalah string
-              id_dokter: data.id_dokter, // Tidak perlu parse ke integer jika id_dokter adalah string
-              tgl_appointment: parseDate(data.tgl_appointment), // Pastikan parseDate mengembalikan format yang benar
-              catatan: data.catatan,
+              kode_cabang: data.kode_cabang,
+              id_user: data.id_user,
+              id_barang: data.id_barang,
+              id_satuan: data.id_satuan,
+              tanggal_request: new Date(data.tanggal_request),
+              department: data.department,
+              jumlah_barang: data.jumlah_barang,
+              keperluan: data.keperluan,
+              status: data.status,
             },
           });
-
           console.log("Update berhasil:", result);
           break;
 
         case "delete":
           // Validasi input untuk aksi delete
-          if (!data.id_appointment) {
+          if (!data.kode_request) {
             return res
               .status(400)
-              .json({ success: false, message: "ID Appointment hilang" });
+              .json({ success: false, message: "Kode permintaan hilang" });
           }
 
           // Memeriksa apakah rekaman ada sebelum dihapus
-          const appointmentToDelete = await prisma.appointment.findUnique({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
+          const requestToDelete = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
           });
 
-          if (!appointmentToDelete) {
+          if (!requestToDelete) {
             return res
               .status(404)
-              .json({ success: false, message: "Appointment tidak ditemukan" });
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
           }
           console.log(
-            "Appointment yang akan dihapus ditemukan:",
-            appointmentToDelete
+            "Permintaan yang akan dihapus ditemukan:",
+            requestToDelete
           );
 
-          // Memeriksa apakah ada rekaman terkait
-          const relatedRecords = await prisma.pembayaran.findMany({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
-          });
-
-          if (relatedRecords.length > 0) {
-            return res.status(400).json({
-              success: false,
-              message:
-                "Tidak dapat menghapus appointment dengan rekaman terkait",
-            });
-          }
-
-          // Menghapus appointment
-          result = await prisma.appointment.delete({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
+          // Menghapus permintaan
+          result = await prisma.request.delete({
+            where: { kode_request: data.kode_request },
           });
           console.log("Delete berhasil:", result);
           break;
@@ -342,144 +558,10 @@ const appointmentController = {
       }
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("Error dalam pegawaiCRUDAppointment:", error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  },
-
-  // Pemilik: Hanya dapat melihat data
-  pemilikCRUDAppointment: async (req, res) => {
-    try {
-      const { user } = req;
-
-      // Verifikasi peran pengguna
-      if (user.jabatan !== "pemilik") {
-        return res
-          .status(403)
-          .json({ success: false, message: "Akses tidak sah" });
-      }
-
-      const idPemilik = user.id_user || ""; // Ganti dengan logika yang sesuai jika diperlukan
-      const { action, data } = req.body;
-      console.log("Data diterima:", data);
-      let result;
-
-      switch (action) {
-        case "create":
-          // Validasi input untuk aksi create
-          if (
-            !data.id_user ||
-            !data.id_hewan ||
-            !data.id_dokter ||
-            !data.tgl_appointment
-          ) {
-            return res.status(400).json({
-              success: false,
-              message: "Field yang diperlukan hilang",
-            });
-          }
-          result = await prisma.appointment.create({
-            data: {
-              id_user: data.id_user,
-              id_hewan: data.id_hewan,
-              id_dokter: data.id_dokter,
-              tgl_appointment: parseDate(data.tgl_appointment),
-              catatan: data.catatan,
-            },
-          });
-          console.log("Appointment berhasil dibuat:", result);
-          break;
-
-        case "read":
-          // Baca semua janji untuk pemilik tertentu
-          result = await prisma.appointment.findMany({
-            where: { id_user: idPemilik },
-            orderBy: {
-              id_appointment: "asc",
-            },
-            select: {
-              id_appointment: true,
-              id_user: true,
-              user: {
-                select: {
-                  username: true,
-                },
-              },
-              id_hewan: true,
-              hewan: {
-                select: {
-                  nama_hewan: true,
-                },
-              },
-              id_dokter: true,
-              dokter: {
-                select: {
-                  nama_dokter: true,
-                },
-              },
-              tgl_appointment: true,
-              catatan: true,
-            },
-          });
-
-          // Format tanggal
-          result = result.map((appointment) => ({
-            ...appointment,
-            tgl_appointment: formatDate(new Date(appointment.tgl_appointment)),
-          }));
-          console.log("Data Janji untuk pemilik:", result);
-          break;
-
-        case "update":
-          // Validasi input untuk aksi update
-          if (!data.id_appointment) {
-            return res
-              .status(400)
-              .json({ success: false, message: "ID Appointment hilang" });
-          }
-
-          // Memeriksa apakah rekaman ada sebelum diperbarui
-          const appointmentToUpdate = await prisma.appointment.findUnique({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
-          });
-
-          if (!appointmentToUpdate) {
-            return res
-              .status(404)
-              .json({ success: false, message: "Appointment tidak ditemukan" });
-          }
-          console.log(
-            "Appointment yang akan diperbarui ditemukan:",
-            appointmentToUpdate
-          );
-
-          // Perbarui data appointment
-          result = await prisma.appointment.update({
-            where: { id_appointment: data.id_appointment }, // Gunakan string langsung
-            data: {
-              id_user: data.id_user, // Tidak perlu parse ke integer jika id_user adalah string
-              id_hewan: data.id_hewan, // Tidak perlu parse ke integer jika id_hewan adalah string
-              id_dokter: data.id_dokter, // Tidak perlu parse ke integer jika id_dokter adalah string
-              tgl_appointment: parseDate(data.tgl_appointment), // Pastikan parseDate mengembalikan format yang benar
-              catatan: data.catatan,
-            },
-          });
-
-          console.log("Update berhasil:", result);
-          break;
-
-        default:
-          return res
-            .status(400)
-            .json({ success: false, message: "Aksi tidak valid" });
-      }
-
-      return res.status(200).json({ success: true, data: result });
-    } catch (error) {
-      console.error("Error dalam pemilikCRUDAppointment:", error);
+      console.error("Error Pegawai In CRUD Request:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },
 };
 
-export default appointmentController;
+export default requestController;

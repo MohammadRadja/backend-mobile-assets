@@ -7,9 +7,9 @@ const router = express.Router();
 router.post("/auth/login", authControllers.handleLogin);
 
 // Routes untuk pendaftaran pemilik
-router.post("/auth/register", authControllers.PemilikRegister);
+router.post("/auth/register", authControllers.PegawaiRegister);
 
 // Routes untuk pemilik forgot-password
-router.post("/auth/forgot-password", authControllers.PemilikForgotPassword);
+router.post("/auth/forgot-password", authControllers.PegawaiForgotPassword);
 
 export default router;

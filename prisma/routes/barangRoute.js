@@ -1,105 +1,211 @@
 import express from "express";
 import {
   authenticateToken,
-  isAdmin,
+  isManager,
+  isOfficer,
   isEmployee,
-  isOwner,
 } from "../middlewares/authMiddleware.js";
-import hewanController from "../controllers/hewanController.js";
+import barangController from "../controllers/barangController.js";
 
 const router = express.Router();
 
-// Middleware untuk logging HTTP request
-const logRequest = (req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
-  next();
-};
-
-/* Routes untuk Admin */
-// POST -> CREATE
+/**
+ * @route POST /manajer/barang
+ * @desc Manajer: Membuat barang baru
+ * @access Private (Manajer)
+ */
 router.post(
-  "/admin/hewan",
-  logRequest,
+  "/manajer/barang",
   authenticateToken,
-  isAdmin,
-  hewanController.adminCRUDHewan
-);
-
-// GET - READ
-router.get(
-  "/admin/hewan",
-  logRequest,
-  authenticateToken,
-  isAdmin,
-  hewanController.adminCRUDHewan,
-  (req, res) => {
-    console.log("Admin GET /admin/hewan");
-    res.json({ message: "Data hewan berhasil diambil" });
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.manajerCRUDBarang(req, res);
+      console.log("Barang berhasil dibuat oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal membuat barang oleh manajer:", error);
+      next(error);
+    }
   }
 );
 
-// PUT -> EDIT
+/**
+ * @route GET /manajer/barang
+ * @desc manajer: Mendapatkan daftar barang
+ * @access Private (manajer)
+ */
+router.get(
+  "/manajer/barang",
+  authenticateToken,
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.manajerCRUDBarang(req, res);
+      console.log("Barang berhasil diambil oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal mendapatkan barang oleh manajer:", error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * @route PUT /manajer/barang/:id
+ * @desc manajer: Mengedit barang
+ * @access Private (manajer)
+ */
 router.put(
-  "/admin/hewan/:id",
-  logRequest,
+  "/manajer/barang/:id",
   authenticateToken,
-  isAdmin,
-  hewanController.adminCRUDHewan
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.manajerCRUDBarang(req, res);
+      console.log("Barang berhasil diperbarui oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal memperbarui barang oleh manajer:", error);
+      next(error);
+    }
+  }
 );
 
-// DELETE
+/**
+ * @route DELETE /manajer/barang/:id
+ * @desc manajer: Menghapus barang
+ * @access Private (manajer)
+ */
 router.delete(
-  "/admin/hewan/:id",
-  logRequest,
+  "/manajer/barang/:id",
   authenticateToken,
-  isAdmin,
-  hewanController.adminCRUDHewan
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.manajerCRUDBarang(req, res);
+      console.log("Barang berhasil dihapus oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal menghapus barang oleh manajer:", error);
+      next(error);
+    }
+  }
 );
 
-/* Routes untuk Pegawai */
-// POST -> CREATE
+/**
+ * @route POST /petugas/barang
+ * @desc petugas: Membuat barang baru
+ * @access Private (petugas)
+ */
 router.post(
-  "/pegawai/hewan",
-  logRequest,
+  "/petugas/barang",
   authenticateToken,
-  isEmployee,
-  hewanController.pegawaiCRUDHewan
+  isOfficer,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.petugasCRUDBarang(req, res);
+      console.log("Barang berhasil dibuat oleh petugas:", result);
+    } catch (error) {
+      console.error("Gagal membuat barang oleh petugas:", error);
+      next(error);
+    }
+  }
 );
 
-// GET - READ
-router.post(
-  "/pegawai/hewan",
-  logRequest,
+/**
+ * @route GET /petugas/barang
+ * @desc petugas: Mendapatkan daftar barang
+ * @access Private (petugas)
+ */
+router.get(
+  "/petugas/barang",
   authenticateToken,
-  isEmployee,
-  hewanController.pegawaiCRUDHewan
+  isOfficer,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.petugasCRUDBarang(req, res);
+      console.log("Barang berhasil diambil oleh petugas:", result);
+    } catch (error) {
+      console.error("Gagal mendapatkan barang oleh petugas:", error);
+      next(error);
+    }
+  }
 );
 
-// PUT -> EDIT
+/**
+ * @route PUT /petugas/barang/:id
+ * @desc petugas: Mengedit barang
+ * @access Private (petugas)
+ */
 router.put(
-  "/pegawai/hewan/:id",
-  logRequest,
+  "/petugas/barang/:id",
   authenticateToken,
-  isEmployee,
-  hewanController.pegawaiCRUDHewan
+  isOfficer,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.petugasCRUDBarang(req, res);
+      console.log("Barang berhasil diperbarui oleh petugas:", result);
+    } catch (error) {
+      console.error("Gagal memperbarui barang oleh petugas:", error);
+      next(error);
+    }
+  }
 );
 
-// DELETE
+/**
+ * @route DELETE /petugas/barang/:id
+ * @desc petugas: Menghapus barang
+ * @access Private (petugas)
+ */
 router.delete(
-  "/pegawai/hewan/:id",
-  logRequest,
+  "/petugas/barang/:id",
   authenticateToken,
-  isEmployee,
-  hewanController.pegawaiCRUDHewan
+  isOfficer,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.petugasCRUDBarang(req, res);
+      console.log("Barang berhasil dihapus oleh petugas:", result);
+    } catch (error) {
+      console.error("Gagal menghapus barang oleh petugas:", error);
+      next(error);
+    }
+  }
 );
 
-/* Routes untuk Pemilik */
-// GET - READ
-router.post(
-  "/pemilik/hewan",
-  logRequest,
+/**
+ * @route GET /pegawai/barang
+ * @desc pegawai: Mendapatkan daftar barang
+ * @access Private (pegawai)
+ */
+router.get(
+  "/pegawai/barang",
   authenticateToken,
-  isOwner,
-  hewanController.pemilikCRUDHewan
+  isEmployee,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.pegawaiReadBarang(req, res);
+      console.log("Barang berhasil diambil oleh pegawai:", result);
+    } catch (error) {
+      console.error("Gagal mendapatkan barang oleh pegawai:", error);
+      next(error);
+    }
+  }
 );
+/**
+ * @route POST /pegawai/barang
+ * @desc pegawai: Mendapatkan daftar barang
+ * @access Private (pegawai)
+ */
+router.post(
+  "/pegawai/barang",
+  authenticateToken,
+  isEmployee,
+  async (req, res, next) => {
+    try {
+      const result = await barangController.pegawaiReadBarang(req, res);
+      console.log("Barang berhasil diambil oleh pegawai:", result);
+    } catch (error) {
+      console.error("Gagal mendapatkan barang oleh pegawai:", error);
+      next(error);
+    }
+  }
+);
+
 export default router;

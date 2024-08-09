@@ -1,95 +1,150 @@
 import express from "express";
 import {
   authenticateToken,
-  isAdmin,
+  isManager,
+  isOfficer,
   isEmployee,
-  isOwner,
 } from "../middlewares/authMiddleware.js";
-import dataPemilikController from "../controllers/dataPemilikController.js";
+import dataManajerController from "../controllers/dataManajerController.js";
 
 const router = express.Router();
 
-// Routes untuk Admin
-//POST -> CREATE
+/**
+ * @route POST /manajer/manajer
+ * @desc Manajer: Membuat data manajer baru
+ * @access Private (Manajer)
+ */
 router.post(
-  "/admin/pemilik",
+  "/manajer/manajer",
   authenticateToken,
-  isAdmin,
-  dataPemilikController.adminCRUDDataPemilik
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await dataManajerController.ManajerCRUDDataManajer(
+        req,
+        res
+      );
+      console.log("Data manajer berhasil dibuat oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal membuat data manajer oleh manajer:", error);
+      next(error);
+    }
+  }
 );
-//GET -> READ
+
+/**
+ * @route GET /manajer/manajer
+ * @desc Manajer: Mendapatkan daftar data manajer
+ * @access Private (Manajer)
+ */
 router.get(
-  "/admin/pemilik",
+  "/manajer/manajer",
   authenticateToken,
-  isAdmin,
-  dataPemilikController.adminCRUDDataPemilik
-);
-//PUT -> UPDATE
-router.put(
-  "/admin/pemilik/:id",
-  authenticateToken,
-  isAdmin,
-  dataPemilikController.adminCRUDDataPemilik
-);
-//DELETE
-router.delete(
-  "/admin/pemilik/:id",
-  authenticateToken,
-  isAdmin,
-  dataPemilikController.adminCRUDDataPemilik
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await dataManajerController.ManajerCRUDDataManajer(
+        req,
+        res
+      );
+      console.log("Data manajer berhasil diambil oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal mendapatkan data manajer oleh manajer:", error);
+      next(error);
+    }
+  }
 );
 
-// Routes untuk Pegawai
-//POST -> CREATE
-router.post(
-  "/pegawai/pemilik",
-  authenticateToken,
-  isEmployee,
-  dataPemilikController.pegawaiCRUDDataPemilik
-);
-//GET -> READ
-router.post(
-  "/pegawai/pemilik",
-  authenticateToken,
-  isEmployee,
-  dataPemilikController.pegawaiCRUDDataPemilik
-);
-//PUT -> UPDATE
+/**
+ * @route PUT /manajer/manajer/:id
+ * @desc Manajer: Mengedit data manajer
+ * @access Private (Manajer)
+ */
 router.put(
-  "/pegawai/pemilik/:id",
+  "/manajer/manajer/:id",
   authenticateToken,
-  isEmployee,
-  dataPemilikController.pegawaiCRUDDataPemilik
-);
-//DELETE
-router.delete(
-  "/pegawai/pemilik/:id",
-  authenticateToken,
-  isEmployee,
-  dataPemilikController.pegawaiCRUDDataPemilik
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await dataManajerController.ManajerCRUDDataManajer(
+        req,
+        res
+      );
+      console.log("Data manajer berhasil diperbarui oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal memperbarui data manajer oleh manajer:", error);
+      next(error);
+    }
+  }
 );
 
-// Routes untuk Pemilik
-//GET -> READ
-router.post(
-  "/pemilik/pemilik",
+/**
+ * @route DELETE /manajer/manajer/:id
+ * @desc Manajer: Menghapus data manajer
+ * @access Private (Manajer)
+ */
+router.delete(
+  "/manajer/manajer/:id",
   authenticateToken,
-  isOwner,
-  dataPemilikController.pemilikCRUDDataPemilik
+  isManager,
+  async (req, res, next) => {
+    try {
+      const result = await dataManajerController.ManajerCRUDDataManajer(
+        req,
+        res
+      );
+      console.log("Data manajer berhasil dihapus oleh manajer:", result);
+    } catch (error) {
+      console.error("Gagal menghapus data manajer oleh manajer:", error);
+      next(error);
+    }
+  }
 );
-//GET -> READ BY ID
-router.post(
-  "/pemilik/pemilik/:id",
+
+/**
+ * @route GET /petugas/manajer
+ * @desc Petugas: Melihat data manajer
+ * @access Private (Petugas)
+ */
+router.get(
+  "/petugas/manajer",
   authenticateToken,
-  isOwner,
-  dataPemilikController.pemilikCRUDDataPemilik
+  isOfficer,
+  async (req, res, next) => {
+    try {
+      const result = await dataManajerController.petugasReadDataManajer(
+        req,
+        res
+      );
+      console.log("Data manajer berhasil diambil oleh petugas:", result);
+    } catch (error) {
+      console.error("Gagal mendapatkan data manajer oleh petugas:", error);
+      next(error);
+    }
+  }
 );
-//PUT -> UPDATE
-router.put(
-  "/pemilik/pemilik/:id",
+
+/**
+ * @route GET /pegawai/manajer
+ * @desc Pegawai: Melihat data manajer
+ * @access Private (Pegawai)
+ */
+router.get(
+  "/pegawai/manajer",
   authenticateToken,
-  isOwner,
-  dataPemilikController.pemilikCRUDDataPemilik
+  isEmployee,
+  async (req, res, next) => {
+    try {
+      const result = await dataManajerController.pegawaiReadDataManajer(
+        req,
+        res
+      );
+      console.log("Data manajer berhasil diambil oleh pegawai:", result);
+    } catch (error) {
+      console.error("Gagal mendapatkan data manajer oleh pegawai:", error);
+      next(error);
+    }
+  }
 );
 
 export default router;
