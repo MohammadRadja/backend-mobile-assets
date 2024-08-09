@@ -90,10 +90,8 @@ router.put(
 router.delete(
   "/manajer/petugas/:id",
   authenticateToken,
-  isOfficer,
+  isManager,
   async (req, res, next) => {
-    req.body.action = "delete";
-    req.body.data = { id_user: req.params.id };
     try {
       const result = await dataPetugasController.manajerCRUDDataPetugas(
         req,
@@ -109,30 +107,6 @@ router.delete(
 
 /**
  * @route POST /petugas
- * @desc Petugas: Membuat data petugas baru
- * @access Private (Petugas)
- */
-router.post(
-  "/petugas/petugas",
-  authenticateToken,
-  isOfficer,
-  async (req, res, next) => {
-    req.body.action = "create";
-    try {
-      const result = await dataPetugasController.petugasCRUDDataPetugas(
-        req,
-        res
-      );
-      console.log("Data petugas berhasil dibuat oleh petugas:", result);
-    } catch (error) {
-      console.error("Gagal membuat data petugas oleh petugas:", error);
-      next(error);
-    }
-  }
-);
-
-/**
- * @route POST /petugas
  * @desc Petugas: Mendapatkan data petugas berdasarkan id
  * @access Private (Petugas)
  */
@@ -141,8 +115,6 @@ router.post(
   authenticateToken,
   isOfficer,
   async (req, res, next) => {
-    req.body.action = "read";
-    req.body.data = { id_user: idPetugas || req.params.id };
     try {
       const result = await dataPetugasController.petugasCRUDDataPetugas(
         req,
@@ -166,8 +138,6 @@ router.put(
   authenticateToken,
   isOfficer,
   async (req, res, next) => {
-    req.body.action = "update";
-    req.body.data = { ...req.body.data, id_user: idPetugas || req.params.id };
     try {
       const result = await dataPetugasController.petugasCRUDDataPetugas(
         req,
@@ -176,31 +146,6 @@ router.put(
       console.log("Data petugas berhasil diperbarui oleh petugas:", result);
     } catch (error) {
       console.error("Gagal memperbarui data petugas oleh petugas:", error);
-      next(error);
-    }
-  }
-);
-
-/**
- * @route DELETE /petugas/:id
- * @desc Petugas: Menghapus data petugas
- * @access Private (Petugas)
- */
-router.delete(
-  "/petugas/petugas/:id",
-  authenticateToken,
-  isOfficer,
-  async (req, res, next) => {
-    req.body.action = "delete";
-    req.body.data = { id_user: idPetugas || req.params.id };
-    try {
-      const result = await dataPetugasController.petugasCRUDDataPetugas(
-        req,
-        res
-      );
-      console.log("Data petugas berhasil dihapus oleh petugas:", result);
-    } catch (error) {
-      console.error("Gagal menghapus data petugas oleh petugas:", error);
       next(error);
     }
   }

@@ -49,6 +49,12 @@ const dataPegawaiController = {
           result = await prisma.user.findMany({
             where: { jabatan: "pegawai" },
             orderBy: { id_user: "asc" },
+            select: {
+              id_user: true,
+              username: true,
+              password: false,
+              jabatan: true,
+            },
           });
           break;
 

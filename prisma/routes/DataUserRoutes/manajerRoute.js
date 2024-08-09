@@ -17,18 +17,7 @@ router.post(
   "/manajer/manajer",
   authenticateToken,
   isManager,
-  async (req, res, next) => {
-    try {
-      const result = await dataManajerController.ManajerCRUDDataManajer(
-        req,
-        res
-      );
-      console.log("Data manajer berhasil diambil oleh manajer:", result);
-    } catch (error) {
-      console.error("Gagal mendapatkan data manajer oleh manajer:", error);
-      next(error);
-    }
-  }
+  dataManajerController.ManajerCRUDDataManajer
 );
 
 /**
@@ -63,18 +52,7 @@ router.get(
   "/petugas/manajer",
   authenticateToken,
   isOfficer,
-  async (req, res, next) => {
-    try {
-      const result = await dataManajerController.petugasReadDataManajer(
-        req,
-        res
-      );
-      console.log("Data manajer berhasil diambil oleh petugas:", result);
-    } catch (error) {
-      console.error("Gagal mendapatkan data manajer oleh petugas:", error);
-      next(error);
-    }
-  }
+  dataManajerController.petugasReadDataManajer
 );
 
 /**
@@ -86,18 +64,7 @@ router.get(
   "/pegawai/manajer",
   authenticateToken,
   isEmployee,
-  async (req, res, next) => {
-    try {
-      const result = await dataManajerController.pegawaiReadDataManajer(
-        req,
-        res
-      );
-      console.log("Data manajer berhasil diambil oleh pegawai:", result);
-    } catch (error) {
-      console.error("Gagal mendapatkan data manajer oleh pegawai:", error);
-      next(error);
-    }
-  }
+  dataManajerController.pegawaiReadDataManajer
 );
 
 export default router;

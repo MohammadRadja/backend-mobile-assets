@@ -62,6 +62,7 @@ const dataPetugasController = {
             select: {
               id_user: true,
               username: true,
+              password: false,
               jabatan: true,
             },
           });
@@ -69,28 +70,17 @@ const dataPetugasController = {
           break;
 
         case "update":
-          // Cek apakah petugas dengan ID yang diberikan ada
-          const existingUser = await prisma.user.findUnique({
-            where: { id_user: data.id_user },
-          });
-
-          if (!existingUser) {
-            return res.status(404).json({
-              success: false,
-              message: "Petugas tidak ditemukan",
-            });
+          let updateData = { ...data };
+          if (data.password) {
+            const hash = await bcrypt.hash(data.password, 10);
+            updateData.password = hash; // Mengupdate password yang sudah dihash
           }
 
-          // Update data petugas
           result = await prisma.user.update({
             where: { id_user: data.id_user },
-            data: { ...data },
+            data: updateData,
           });
-          return res.status(200).json({
-            success: true,
-            message: "Update Petugas Sukses",
-            data: result,
-          });
+          break;
 
         case "delete":
           // Cek apakah petugas dengan ID yang diberikan ada
@@ -138,7 +128,7 @@ const dataPetugasController = {
     try {
       // Pastikan user memiliki peran pegawai
       const { user } = req;
-      if (user.jabatan !== "pegawai") {
+      if (user.jabatan !== "petugas") {
         return res
           .status(403)
           .json({ success: false, message: "Akses tidak diizinkan" });
@@ -230,8 +220,8 @@ const dataPetugasController = {
         orderBy: { id_user: "asc" }, // Mengurutkan berdasarkan id_user
         select: {
           id_user: true,
-          nama: true,
-          email: true,
+          username: true,
+          password: false,
           jabatan: true,
         },
       });

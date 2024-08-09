@@ -18,19 +18,7 @@ router.post(
   "/manajer/pegawai",
   authenticateToken,
   isManager,
-  async (req, res, next) => {
-    req.body.action = "create";
-    try {
-      const result = await dataPegawaiController.manajerCRUDDataPegawai(
-        req,
-        res
-      );
-      console.log("Data pegawai berhasil dibuat oleh manajer:", result);
-    } catch (error) {
-      console.error("Gagal membuat data pegawai oleh manajer:", error);
-      next(error);
-    }
-  }
+  dataPegawaiController.manajerCRUDDataPegawai
 );
 
 /**
@@ -38,23 +26,11 @@ router.post(
  * @desc Manager: Mendapatkan daftar data pegawai
  * @access Private (manajer)
  */
-router.get(
+router.post(
   "/manajer/pegawai",
   authenticateToken,
   isManager,
-  async (req, res, next) => {
-    req.body.action = "read";
-    try {
-      const result = await dataPegawaiController.manajerCRUDDataPegawai(
-        req,
-        res
-      );
-      console.log("Data pegawai berhasil diambil oleh manajer:", result);
-    } catch (error) {
-      console.error("Gagal mendapatkan data pegawai oleh manajer:", error);
-      next(error);
-    }
-  }
+  dataPegawaiController.manajerCRUDDataPegawai
 );
 
 /**
@@ -68,7 +44,7 @@ router.put(
   isManager,
   async (req, res, next) => {
     req.body.action = "update";
-    req.body.data = { ...req.body.data, id_user: req.params.id };
+    req.body.data = { id_user: req.params.id };
     try {
       const result = await dataPegawaiController.manajerCRUDDataPegawai(
         req,
@@ -216,7 +192,6 @@ router.post(
   isEmployee,
   async (req, res, next) => {
     req.body.action = "read";
-    req.body.data = { id_user: idPegawai || req.params.id };
     try {
       const result = await dataPegawaiController.pegawaiReadDataPegawai(
         req,
