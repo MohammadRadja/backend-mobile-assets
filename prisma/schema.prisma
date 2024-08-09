@@ -1,135 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model cabang {
+  kode_cabang   String    @id @default(uuid())
+  nama_cabang   String
+  alamat_cabang String
+  notelp_cabang String
+  keterangan    String?
+  request      request[] 
 }
 
-model Admin {
-  id_admin   Int      @id @default(autoincrement())
-  username   String   @unique
-  password   String
-  nama       String
-  jabatan    String
-  createdAt  DateTime @default(now())
+model request {
+  kode_request    String    @id
+  kode_cabang     String
+  id_user         String  
+  id_barang       String    
+  id_satuan       String
+  tanggal_request DateTime
+  department      String
+  jumlah_barang   Int
+  keperluan       String
+  status          String
+
+  barang          barang?    @relation(fields: [id_barang], references: [id_barang], onDelete: Cascade, onUpdate: Cascade)
+  cabang          cabang?    @relation(fields: [kode_cabang], references: [kode_cabang], onDelete: Cascade, onUpdate: Cascade)
+  user            user?      @relation(fields: [id_user], references: [id_user], onDelete: Cascade, onUpdate: Cascade)
+  satuan_barang   satuan_barang?   @relation(fields: [id_satuan], references: [id_satuan], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model Pegawai {
-  id_pegawai  Int      @id @default(autoincrement())
-  username    String   @unique
-  password    String
-  jabatan     String
-  alamat      String
-  no_telp     String
-  rekam_medis RekamMedis[]
+model barang {
+  id_barang    String      @id @default(uuid())
+  nama_barang  String
+  jenis_barang String
+  id_satuan    String
+  harga        Float
+  stok_awal    Int
+  terpakai     Int
+  sisa         Int         
+
+  satuan_barang satuan_barang? @relation(fields: [id_satuan], references: [id_satuan], onDelete: Cascade, onUpdate: Cascade)
+  request     request[]      
 }
 
-model Pemilik {
-  id_pemilik  Int      @id @default(autoincrement())
-  username    String   @unique
-  password    String
-  jabatan     String
-  alamat      String
-  no_telp     String
-  hewan         Hewan[]
-  rekam_medis   RekamMedis[]
-  appointments  Appointment[]
-  pembayaran    Pembayaran[]
-  resep   Resep[]
+model satuan_barang {
+  id_satuan   String   @id @default(uuid())
+  nama_satuan String
+  barang      barang[]
+  request     request[]
 }
 
-model Hewan {
-  id_hewan      Int      @id @default(autoincrement())
-  id_pemilik    Int
-  nama_hewan    String
-  jenis_hewan   String
-  umur          Int
-  berat         Float
-  jenis_kelamin String
-  rekam_medis   RekamMedis[]
-  appointments  Appointment[] 
-  pembayaran    Pembayaran[]
-  pemilik       Pemilik?  @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Obat {
-  id_obat      Int      @id @default(autoincrement())
-  nama_obat    String
-  keterangan   String
-  rekam_medis RekamMedis[]
-  resep        Resep[]
-  pembayaran     Pembayaran[]
-}
-
-model RekamMedis {
-  id_rekam_medis Int       @id @default(autoincrement())
-  id_hewan       Int
-  id_pemilik     Int
-  id_pegawai     Int
-  id_obat        Int
-  keluhan        String
-  diagnosa       String
-  tgl_periksa    DateTime
-  pembayaran     Pembayaran[]
-  resep          Resep[]
-  hewan          Hewan?     @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
-  pemilik        Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
-  pegawai        Pegawai?   @relation(fields: [id_pegawai], references: [id_pegawai], onDelete: Cascade, onUpdate: Cascade)
-  obat           Obat?      @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Pembayaran {
-  id_pembayaran   Int        @id @default(autoincrement())
-  id_rekam_medis  Int        
-  rekam_medis     RekamMedis? @relation(fields: [id_rekam_medis], references: [id_rekam_medis], onDelete: Cascade, onUpdate: Cascade)
-  id_pemilik      Int
-  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
-  id_hewan        Int
-  hewan           Hewan?     @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
-  id_dokter       Int
-  dokter          Dokter?    @relation(fields: [id_dokter], references: [id_dokter], onDelete: Cascade, onUpdate: Cascade)
-  id_appointment  Int
-  appointment     Appointment? @relation(fields: [id_appointment], references: [id_appointment], onDelete: Cascade, onUpdate: Cascade)
-  id_obat         Int
-  obat            Obat?      @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
-  id_resep        Int
-  resep           Resep?     @relation(fields: [id_resep], references: [id_resep], onDelete: Cascade, onUpdate: Cascade)
-  tgl_pembayaran  DateTime
-  jumlah_pembayaran Float
-  bukti_pembayaran String
-}
-
-model Resep {
-  id_resep        Int        @id @default(autoincrement())
-  id_pemilik      Int
-  id_rekam_medis  Int        
-  id_obat         Int
-  jumlah_obat     Int
-  pembayaran      Pembayaran[]
-  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
-  rekam_medis     RekamMedis? @relation(fields: [id_rekam_medis], references: [id_rekam_medis], onDelete: Cascade, onUpdate: Cascade)
-  obat            Obat?       @relation(fields: [id_obat], references: [id_obat], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Appointment {
-  id_appointment  Int      @id @default(autoincrement())
-  id_pemilik      Int
-  id_hewan        Int
-  id_dokter       Int
-  tgl_appointment DateTime
-  catatan         String?
-  pembayaran      Pembayaran[]
-  hewan           Hewan?    @relation(fields: [id_hewan], references: [id_hewan], onDelete: Cascade, onUpdate: Cascade)
-  dokter          Dokter?   @relation(fields: [id_dokter], references: [id_dokter], onDelete: Cascade, onUpdate: Cascade)
-  pemilik         Pemilik?   @relation(fields: [id_pemilik], references: [id_pemilik], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model Dokter {
-  id_dokter       Int       @id @default(autoincrement())
-  nama_dokter     String
-  spesialisasi    String
-  appointments    Appointment[]
-  pembayaran      Pembayaran[]
+model user {
+  id_user   String    @id @default(uuid())
+  username  String    @unique
+  password  String
+  jabatan   String
+  request  request[] 
 }

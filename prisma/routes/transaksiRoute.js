@@ -5,7 +5,6 @@ import {
   isEmployee,
   isOwner,
 } from "../middlewares/authMiddleware.js";
-import upload from "../middlewares/multer.js";
 import pembayaranController from "../controllers/pembayaranController.js";
 
 const router = express.Router();
@@ -14,13 +13,12 @@ const router = express.Router();
 //POST -> CREATE
 router.post(
   "/admin/pembayaran",
-  upload.single("bukti_bayar"),
   authenticateToken,
   isAdmin,
   pembayaranController.adminCRUDPembayaran
 );
 //GET -> READ
-router.post(
+router.get(
   "/admin/pembayaran",
   authenticateToken,
   isAdmin,
@@ -35,7 +33,7 @@ router.put(
 );
 //DELETE
 router.delete(
-  "/admin/pembayaran/",
+  "/admin/pembayaran/:id",
   authenticateToken,
   isAdmin,
   pembayaranController.adminCRUDPembayaran
@@ -46,12 +44,11 @@ router.delete(
 router.post(
   "/pegawai/pembayaran",
   authenticateToken,
-  upload.single("bukti_bayar"),
   isEmployee,
   pembayaranController.pegawaiCRUDPembayaran
 );
 //GET -> READ
-router.post(
+router.get(
   "/pegawai/pembayaran",
   authenticateToken,
   isEmployee,
@@ -73,12 +70,37 @@ router.delete(
 );
 
 /* Routes untuk Pemilik */
+
+// CREATE
 router.post(
   "/pemilik/pembayaran",
-  upload.single("bukti_bayar"),
   authenticateToken,
   isOwner,
-  pembayaranController.pemilikReadPembayaran
+  pembayaranController.pemilikCRUDPembayaran
+);
+
+// READ
+router.get(
+  "/pemilik/pembayaran",
+  authenticateToken,
+  isOwner,
+  pembayaranController.pemilikCRUDPembayaran
+);
+
+// UPDATE
+router.put(
+  "/pemilik/pembayaran/:id",
+  authenticateToken,
+  isOwner,
+  pembayaranController.pemilikCRUDPembayaran
+);
+
+// DELETE
+router.delete(
+  "/pemilik/pembayaran/:id",
+  authenticateToken,
+  isOwner,
+  pembayaranController.pemilikCRUDPembayaran
 );
 
 export default router;

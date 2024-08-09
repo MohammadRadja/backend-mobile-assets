@@ -1,0 +1,27 @@
+-- View Transaksi 
+CREATE VIEW Transaksi AS
+SELECT 
+    r.kode_request,
+    r.tanggal_request,
+    c.nama_cabang,
+    SUM(r.jumlah_barang) AS total_request
+FROM 
+    Request r
+JOIN 
+    Cabang c ON r.kode_cabang = c.kode_cabang
+GROUP BY 
+    r.kode_request, r.tanggal_request, c.nama_cabang;
+
+-- DetailRequest 
+CREATE VIEW DetailRequest AS
+SELECT 
+    r.kode_request,
+    r.id_user,
+    b.id_barang,
+    r.status,
+    r.jumlah_barang AS qty_request,
+    r.jumlah_barang * b.harga AS subtotal
+FROM 
+    Request r
+JOIN 
+    Barang b ON r.id_barang = b.id_barang;
