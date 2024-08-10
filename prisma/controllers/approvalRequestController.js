@@ -21,10 +21,10 @@ const approvalRequestController = {
       if (user.jabatan !== "petugas") {
         return res
           .status(403)
-          .json({ success: false, message: "Akses tidak sah" });
+          .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
-      const { requestID, status = "approved" } = req.body;
+      const { requestID, status } = req.body;
 
       const request = await prisma.request.findUnique({
         where: { kode_request: requestID },
@@ -53,34 +53,31 @@ const approvalRequestController = {
       if (existingApproval) {
         return res.status(400).json({
           success: false,
-          message: "Petugas sudah melakukan approval",
+          message: "Anda sudah melakukan approval",
         });
       }
 
+      // Update status request berdasarkan hasil approval
+      const newStatus = status === "approved" ? "proses" : "ditolak";
+      await prisma.request.update({
+        where: { kode_request: request.kode_request },
+        data: { status: newStatus },
+      });
+
       await prisma.approval.create({
         data: {
-          status,
+          status: status,
           requestID: request.kode_request,
           userID: user.id_user,
         },
       });
 
-      // Update status request menjadi "proses" jika disetujui
-      if (status === "approved") {
-        await prisma.request.update({
-          where: { kode_request: request.kode_request },
-          data: { status: "proses" }, // Ubah status menjadi "proses"
-        });
-      } else if (status === "rejected") {
-        await prisma.request.update({
-          where: { kode_request: request.kode_request },
-          data: { status: "ditolak" },
-        });
-      }
-
-      return res
-        .status(200)
-        .json({ success: true, message: "Approval berhasil" });
+      return res.status(200).json({
+        success: true,
+        message: `Request berhasil ${
+          status === "approved" ? "disetujui" : "ditolak"
+        }`,
+      });
     } catch (error) {
       console.error("Error di approveByPetugas:", error);
       return res.status(500).json({ success: false, message: error.message });
@@ -103,7 +100,7 @@ const approvalRequestController = {
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
-      const { requestID } = req.body;
+      const { requestID, status } = req.body;
 
       const request = await prisma.request.findUnique({
         where: { kode_request: requestID },
@@ -138,26 +135,31 @@ const approvalRequestController = {
       if (existingApproval) {
         return res.status(400).json({
           success: false,
-          message: "Manajer sudah melakukan approval",
+          message: "Anda sudah melakukan approval",
         });
       }
 
+      // Update status request berdasarkan hasil approval
+      const newStatus = status === "approved" ? "disetujui" : "ditolak";
+      await prisma.request.update({
+        where: { kode_request: request.kode_request },
+        data: { status: newStatus },
+      });
+
       await prisma.approval.create({
         data: {
-          status: "approved",
+          status: status,
           requestID: request.kode_request,
           userID: user.id_user,
         },
       });
 
-      await prisma.request.update({
-        where: { kode_request: request.kode_request },
-        data: { status: "disetujui" },
+      return res.status(200).json({
+        success: true,
+        message: `Request berhasil ${
+          status === "approved" ? "disetujui" : "ditolak"
+        }`,
       });
-
-      return res
-        .status(200)
-        .json({ success: true, message: "Approval berhasil" });
     } catch (error) {
       console.error("Error di approveByManajer:", error);
       return res.status(500).json({ success: false, message: error.message });
