@@ -41,41 +41,35 @@ const formatDate = (date) => {
 
 /**
  * Menghasilkan kode request otomatis.
- * @returns {string} - Kode request dalam format REQYYMMNNNN.
+ * @returns {string} - Kode request dalam format REQYYMMDDNNNN.
  */
 const generateRequestCode = async () => {
   const now = new Date();
   const year = now.getFullYear().toString().slice(-2);
   const month = String(now.getMonth() + 1).padStart(2, "0");
-  const date = String(now.getDate()).padStart(2, "0"); // Ambil tanggal dan format menjadi dua digit
+  const date = String(now.getDate()).padStart(2, "0");
 
+  let sequenceNumber = 1;
   let requestCode;
-  let existingRequest;
-  let attempts = 0; // Batasan untuk mencegah loop tak terbatas
 
-  do {
-    // Buat requestCode dengan format baru
-    requestCode = `REQ${year}${month}${date}`;
+  while (true) {
+    requestCode = `REQ${year}${month}${date}${String(sequenceNumber).padStart(
+      4,
+      "0"
+    )}`;
 
-    // Cek apakah kode request sudah ada
-    existingRequest = await prisma.request.findUnique({
+    const existingRequest = await prisma.request.findUnique({
       where: { kode_request: requestCode },
     });
 
-    console.log("Checking requestCode:", requestCode); // Log kode yang diperiksa
-    if (existingRequest) {
-      console.log("Kode request sudah ada, menghasilkan yang baru..."); // Log jika kode sudah ada
-    }
+    if (!existingRequest) break;
 
-    attempts++; // Tambah jumlah percobaan
-    if (attempts > 100) {
-      // Batasi percobaan untuk mencegah loop tak terbatas
-      console.error("Too many attempts to generate a unique request code.");
-      throw new Error("Too many attempts to generate a unique request code.");
+    sequenceNumber++;
+    if (sequenceNumber > 9999) {
+      throw new Error("Unable to generate unique request code.");
     }
-  } while (existingRequest);
+  }
 
-  console.log("Generated unique requestCode:", requestCode); // Log kode yang dihasilkan
   return requestCode;
 };
 
@@ -495,7 +489,7 @@ const requestController = {
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: formatDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              tanggal_request: parseDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,

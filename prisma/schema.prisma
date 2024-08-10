@@ -16,23 +16,6 @@ model cabang {
   request      request[] 
 }
 
-model request {
-  kode_request    String    @id
-  kode_cabang     String
-  id_user         String  
-  id_barang       String    
-  id_satuan       String
-  tanggal_request DateTime
-  department      String
-  jumlah_barang   Int
-  keperluan       String
-  status          String
-
-  barang          barang?    @relation(fields: [id_barang], references: [id_barang], onDelete: Cascade, onUpdate: Cascade)
-  cabang          cabang?    @relation(fields: [kode_cabang], references: [kode_cabang], onDelete: Cascade, onUpdate: Cascade)
-  user            user?      @relation(fields: [id_user], references: [id_user], onDelete: Cascade, onUpdate: Cascade)
-  satuan_barang   satuan_barang?   @relation(fields: [id_satuan], references: [id_satuan], onDelete: Cascade, onUpdate: Cascade)
-}
 
 model barang {
   id_barang    String      @id @default(uuid())
@@ -61,6 +44,37 @@ model user {
   password  String
   jabatan   String
   request  request[] 
+  approval approval[]
+}
+
+model request {
+  kode_request    String    @id
+  kode_cabang     String
+  id_user         String  
+  id_barang       String    
+  id_satuan       String
+  tanggal_request DateTime
+  department      String
+  jumlah_barang   Int
+  keperluan       String
+  status          String
+
+  approval        approval[]
+  barang          barang?    @relation(fields: [id_barang], references: [id_barang], onDelete: Cascade, onUpdate: Cascade)
+  cabang          cabang?    @relation(fields: [kode_cabang], references: [kode_cabang], onDelete: Cascade, onUpdate: Cascade)
+  user            user?      @relation(fields: [id_user], references: [id_user], onDelete: Cascade, onUpdate: Cascade)
+  satuan_barang   satuan_barang?   @relation(fields: [id_satuan], references: [id_satuan], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model approval {
+  id_approval     Int    @id @default(autoincrement())
+  userID         String
+  requestID    String 
+  status          String
+  createdAt  DateTime  @default(now())
+
+  request         request?   @relation(fields: [requestID], references: [kode_request], onDelete: Cascade, onUpdate: Cascade)
+  user            user       @relation(fields: [userID], references: [id_user], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Transaksi {
@@ -81,6 +95,3 @@ model DetailRequest {
   subtotal     Float
   @@map("DetailRequest") 
 }
-
-
-

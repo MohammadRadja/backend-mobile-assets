@@ -10,22 +10,6 @@ CREATE TABLE `cabang` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `request` (
-    `kode_request` VARCHAR(191) NOT NULL,
-    `kode_cabang` VARCHAR(191) NOT NULL,
-    `id_user` VARCHAR(191) NOT NULL,
-    `id_barang` VARCHAR(191) NOT NULL,
-    `id_satuan` VARCHAR(191) NOT NULL,
-    `tanggal_request` DATETIME(3) NOT NULL,
-    `department` VARCHAR(191) NOT NULL,
-    `jumlah_barang` INTEGER NOT NULL,
-    `keperluan` VARCHAR(191) NOT NULL,
-    `status` VARCHAR(191) NOT NULL,
-
-    PRIMARY KEY (`kode_request`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `barang` (
     `id_barang` VARCHAR(191) NOT NULL,
     `nama_barang` VARCHAR(191) NOT NULL,
@@ -58,6 +42,36 @@ CREATE TABLE `user` (
     PRIMARY KEY (`id_user`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `request` (
+    `kode_request` VARCHAR(191) NOT NULL,
+    `kode_cabang` VARCHAR(191) NOT NULL,
+    `id_user` VARCHAR(191) NOT NULL,
+    `id_barang` VARCHAR(191) NOT NULL,
+    `id_satuan` VARCHAR(191) NOT NULL,
+    `tanggal_request` DATETIME(3) NOT NULL,
+    `department` VARCHAR(191) NOT NULL,
+    `jumlah_barang` INTEGER NOT NULL,
+    `keperluan` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`kode_request`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `approval` (
+    `id_approval` INTEGER NOT NULL AUTO_INCREMENT,
+    `userID` VARCHAR(191) NOT NULL,
+    `requestID` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id_approval`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `barang` ADD CONSTRAINT `barang_id_satuan_fkey` FOREIGN KEY (`id_satuan`) REFERENCES `satuan_barang`(`id_satuan`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE `request` ADD CONSTRAINT `request_id_barang_fkey` FOREIGN KEY (`id_barang`) REFERENCES `barang`(`id_barang`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -71,4 +85,7 @@ ALTER TABLE `request` ADD CONSTRAINT `request_id_user_fkey` FOREIGN KEY (`id_use
 ALTER TABLE `request` ADD CONSTRAINT `request_id_satuan_fkey` FOREIGN KEY (`id_satuan`) REFERENCES `satuan_barang`(`id_satuan`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `barang` ADD CONSTRAINT `barang_id_satuan_fkey` FOREIGN KEY (`id_satuan`) REFERENCES `satuan_barang`(`id_satuan`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `approval` ADD CONSTRAINT `approval_requestID_fkey` FOREIGN KEY (`requestID`) REFERENCES `request`(`kode_request`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `approval` ADD CONSTRAINT `approval_userID_fkey` FOREIGN KEY (`userID`) REFERENCES `user`(`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;

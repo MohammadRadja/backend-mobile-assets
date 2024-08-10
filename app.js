@@ -11,6 +11,7 @@ import detailRequestRoute from "./prisma/routes/detailRequestRoute.js";
 import requestRoute from "./prisma/routes/requestRoute.js";
 import satuanBarangRoute from "./prisma/routes/satuanbarangRoute.js";
 import transaksiRoute from "./prisma/routes/transaksiRoute.js";
+import approvalRequestRoute from "./prisma/routes/approvalRequestRoute.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -42,6 +43,7 @@ app.use("/", detailRequestRoute);
 app.use("/", requestRoute);
 app.use("/", satuanBarangRoute);
 app.use("/", transaksiRoute);
+app.use("/", approvalRequestRoute);
 
 // Middleware logging
 app.use((req, res, next) => {

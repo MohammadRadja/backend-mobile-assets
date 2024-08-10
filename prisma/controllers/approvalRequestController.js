@@ -1,0 +1,168 @@
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+/**
+ * Fungsi untuk mengelola approval permintaan oleh petugas atau manajer.
+ * @param {Object} req - Objek request.
+ * @param {Object} res - Objek response.
+ */
+const approvalRequestController = {
+  /**
+   * Fungsi untuk approval permintaan oleh petugas.
+   * @param {Object} req - Objek request.
+   * @param {Object} res - Objek response.
+   */
+  approveByPetugas: async (req, res) => {
+    try {
+      const { user } = req;
+      console.log("User dari request:", user);
+
+      // Verifikasi peran pengguna
+      if (user.jabatan !== "petugas") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses tidak sah" });
+      }
+
+      const { requestID, status = "approved" } = req.body;
+
+      const request = await prisma.request.findUnique({
+        where: { kode_request: requestID },
+        include: { approval: true },
+      });
+
+      if (!request) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Permintaan tidak ditemukan" });
+      }
+
+      if (!request.approval) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Data approval tidak valid" });
+      }
+
+      // Log request untuk debugging
+      console.log("Request yang ditemukan:", request);
+
+      // Cek apakah petugas sudah melakukan approval
+      const existingApproval = request.approval.find(
+        (approval) => approval.userID === user.id_user
+      );
+      if (existingApproval) {
+        return res.status(400).json({
+          success: false,
+          message: "Petugas sudah melakukan approval",
+        });
+      }
+
+      await prisma.approval.create({
+        data: {
+          status,
+          requestID: request.kode_request,
+          userID: user.id_user,
+        },
+      });
+
+      // Update status request menjadi "proses" jika disetujui
+      if (status === "approved") {
+        await prisma.request.update({
+          where: { kode_request: request.kode_request },
+          data: { status: "proses" }, // Ubah status menjadi "proses"
+        });
+      } else if (status === "rejected") {
+        await prisma.request.update({
+          where: { kode_request: request.kode_request },
+          data: { status: "ditolak" },
+        });
+      }
+
+      return res
+        .status(200)
+        .json({ success: true, message: "Approval berhasil" });
+    } catch (error) {
+      console.error("Error di approveByPetugas:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  /**
+   * Fungsi untuk approval permintaan oleh manajer.
+   * @param {Object} req - Objek request.
+   * @param {Object} res - Objek response.
+   */
+  approveByManajer: async (req, res) => {
+    try {
+      const { user } = req;
+
+      // Memeriksa apakah pengguna adalah manajer
+      if (user.jabatan !== "manajer") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses tidak diizinkan" });
+      }
+
+      const { requestID } = req.body;
+
+      const request = await prisma.request.findUnique({
+        where: { kode_request: requestID },
+        include: { approval: true },
+      });
+
+      if (!request) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Permintaan tidak ditemukan" });
+      }
+
+      if (!request.approval || !Array.isArray(request.approval)) {
+        return res.status(400).json({
+          success: false,
+          message: "Data approval tidak valid",
+        });
+      }
+
+      // Cek apakah request sudah ditolak oleh petugas
+      if (request.status === "ditolak") {
+        return res.status(400).json({
+          success: false,
+          message: "Permintaan sudah ditolak oleh petugas",
+        });
+      }
+
+      // Cek apakah manajer sudah melakukan approval
+      const existingApproval = request.approval.find(
+        (approval) => approval.userID === user.id_user
+      );
+      if (existingApproval) {
+        return res.status(400).json({
+          success: false,
+          message: "Manajer sudah melakukan approval",
+        });
+      }
+
+      await prisma.approval.create({
+        data: {
+          status: "approved",
+          requestID: request.kode_request,
+          userID: user.id_user,
+        },
+      });
+
+      await prisma.request.update({
+        where: { kode_request: request.kode_request },
+        data: { status: "disetujui" },
+      });
+
+      return res
+        .status(200)
+        .json({ success: true, message: "Approval berhasil" });
+    } catch (error) {
+      console.error("Error di approveByManajer:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+};
+
+export default approvalRequestController;
