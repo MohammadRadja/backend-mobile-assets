@@ -72,7 +72,7 @@ const barangController = {
               id_barang: "asc",
             },
             include: {
-              satuan: true, // Menyertakan satuan yang terkait jika perlu
+              satuan_barang: true, // Menyertakan satuan yang terkait jika perlu
             },
           });
           console.log("Data barang berhasil dibaca:", result);

@@ -88,8 +88,8 @@ model Transaksi {
 	
 model DetailRequest {
   kode_request String @id
-  id_user      String  
-  id_barang    String
+  nama_pegawai      String  
+  nama_barang    String
   status       String
   qty_request  Int
   subtotal     Float

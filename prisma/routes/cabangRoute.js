@@ -170,26 +170,6 @@ router.delete(
 );
 
 /**
- * @route GET /pegawai/cabang
- * @desc Pegawai: Mendapatkan daftar cabang
- * @access Private (Pegawai)
- */
-router.get(
-  "/pegawai/cabang",
-  authenticateToken,
-  isEmployee,
-  async (req, res, next) => {
-    try {
-      const result = await cabangController.pegawaiReadCabang(req, res);
-      console.log("Cabang berhasil diambil oleh pegawai:", result);
-    } catch (error) {
-      console.error("Gagal mendapatkan cabang oleh pegawai:", error);
-      next(error);
-    }
-  }
-);
-
-/**
  * @route POST /pegawai/cabang
  * @desc Pegawai: Mendapatkan daftar cabang
  * @access Private (Pegawai)
