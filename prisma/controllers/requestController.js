@@ -100,7 +100,7 @@ const requestController = {
         case "create":
           // Menghasilkan kode request otomatis
           const requestCode = await generateRequestCode();
-          console.log("Request Code generated:", requestCode); // Tambahkan log ini
+          console.log("Request Code generated:", requestCode);
 
           // Validasi input untuk aksi create
           if (
@@ -126,50 +126,61 @@ const requestController = {
               message: "Kode request tidak dapat dihasilkan",
             });
           }
-          result = await prisma.request.create({
-            data: {
-              kode_request: requestCode,
-              kode_cabang: data.kode_cabang,
-              id_user: data.id_user,
-              id_barang: data.id_barang,
-              id_satuan: data.id_satuan,
-              tanggal_request: formatDate(data.tanggal_request),
-              department: data.department,
-              jumlah_barang: data.jumlah_barang,
-              keperluan: data.keperluan,
-              status: data.status,
-            },
+
+          // Mulai transaksi untuk membuat request dan approval
+          result = await prisma.$transaction(async (prisma) => {
+            // Membuat request
+            const newRequest = await prisma.request.create({
+              data: {
+                kode_request: requestCode,
+                cabang: { connect: { kode_cabang: data.kode_cabang } },
+                user: { connect: { id_user: data.id_user } },
+                barang: { connect: { id_barang: data.id_barang } },
+                satuan_barang: { connect: { id_satuan: data.id_satuan } },
+                tanggal_request: parseDate(data.tanggal_request),
+                department: data.department,
+                jumlah_barang: data.jumlah_barang,
+                keperluan: data.keperluan,
+                status: "pending",
+              },
+            });
+
+            console.log("Permintaan berhasil dibuat:", newRequest);
+
+            // Membuat approval untuk request yang baru dibuat
+            const newApproval = await prisma.approval.create({
+              data: {
+                userID: data.id_user, // Menggunakan ID pengguna yang sama
+                requestID: newRequest.kode_request, // Menggunakan kode request yang baru dibuat
+                status: "Pending", // Status awal untuk approval
+              },
+            });
+
+            console.log("Approval berhasil dibuat:", newApproval);
+
+            return { newRequest, newApproval };
           });
-          console.log("Permintaan berhasil dibuat:", result);
-          break;
+
+          // Mengembalikan respon berhasil
+          return res.status(201).json({
+            success: true,
+            message: "Permintaan dan approval berhasil dibuat",
+            data: result,
+          });
 
         case "read":
           // Membaca data permintaan
           result = await prisma.request.findMany({
-            orderBy: {
-              kode_request: "asc",
-            },
+            orderBy: { kode_request: "asc" },
             select: {
               kode_request: true,
               kode_cabang: true,
               id_user: true,
-              user: {
-                select: {
-                  username: true,
-                },
-              },
+              user: { select: { username: true } },
               id_barang: true,
-              barang: {
-                select: {
-                  nama_barang: true,
-                },
-              },
+              barang: { select: { nama_barang: true } },
               id_satuan: true,
-              satuan_barang: {
-                select: {
-                  nama_satuan: true,
-                },
-              },
+              satuan_barang: { select: { nama_satuan: true } },
               tanggal_request: true,
               department: true,
               jumlah_barang: true,
@@ -178,7 +189,7 @@ const requestController = {
             },
           });
           console.log("Data Permintaan:", result);
-          break;
+          return res.status(200).json({ success: true, data: result });
 
         case "update":
           // Validasi input untuk aksi update
@@ -219,7 +230,7 @@ const requestController = {
             },
           });
           console.log("Update berhasil:", result);
-          break;
+          return res.status(200).json({ success: true, data: result });
 
         case "delete":
           // Validasi input untuk aksi delete
@@ -249,14 +260,13 @@ const requestController = {
             where: { kode_request: data.kode_request },
           });
           console.log("Delete berhasil:", result);
-          break;
+          return res.status(200).json({ success: true, data: result });
 
         default:
           return res
             .status(400)
             .json({ success: false, message: "Aksi tidak valid" });
       }
-      return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("Error di manajerCRUDRequest:", error);
       return res.status(500).json({ success: false, message: error.message });
@@ -314,7 +324,7 @@ const requestController = {
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: formatDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              tanggal_request: parseDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,

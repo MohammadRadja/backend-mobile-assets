@@ -24,8 +24,24 @@ const approvalRequestController = {
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
-      const { requestID, status } = req.body;
+      const { data } = req.body;
+      const { requestID, status } = data; // Mengambil requestID dan status dari body
 
+      // Validasi requestID
+      if (!requestID) {
+        return res
+          .status(400)
+          .json({ success: false, message: "requestID tidak boleh kosong" });
+      }
+
+      // Validasi status
+      if (!status) {
+        return res
+          .status(400)
+          .json({ success: false, message: "status tidak boleh kosong" });
+      }
+
+      // Cari permintaan berdasarkan requestID
       const request = await prisma.request.findUnique({
         where: { kode_request: requestID },
         include: { approval: true },
@@ -100,8 +116,24 @@ const approvalRequestController = {
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
-      const { requestID, status } = req.body;
+      const { data } = req.body;
+      const { requestID, status } = data; // Mengambil requestID dan status dari body
 
+      // Validasi requestID
+      if (!requestID) {
+        return res
+          .status(400)
+          .json({ success: false, message: "requestID tidak boleh kosong" });
+      }
+
+      // Validasi status
+      if (!status) {
+        return res
+          .status(400)
+          .json({ success: false, message: "status tidak boleh kosong" });
+      }
+
+      // Cari permintaan berdasarkan requestID
       const request = await prisma.request.findUnique({
         where: { kode_request: requestID },
         include: { approval: true },

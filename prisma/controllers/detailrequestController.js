@@ -69,8 +69,8 @@ const detailRequestController = {
         },
         select: {
           kode_request: true,
-          id_user: true,
-          id_barang: true,
+          nama_pegawai: true,
+          nama_barang: true,
           status: true,
           qty_request: true,
           subtotal: true,
@@ -102,25 +102,33 @@ const detailRequestController = {
           .json({ success: false, message: "Unauthorized access" });
       }
 
-      const idPegawai = user.id_user || "";
+      const namaPegawai = user.username;
+      console.log(`Read data detail request for pegawai: ${namaPegawai}`);
 
       // Mengambil data detail request
       const result = await prisma.detailRequest.findMany({
         where: {
-          id_user: idPegawai,
+          nama_pegawai: namaPegawai,
         },
         orderBy: {
           kode_request: "asc", // Mengurutkan berdasarkan kode_request
         },
         select: {
           kode_request: true,
-          id_user: true,
-          id_barang: true,
+          nama_pegawai: true,
+          nama_barang: true,
           status: true,
           qty_request: true,
           subtotal: true,
         },
       });
+
+      // Validasi apakah nama pegawai tercantum dalam data detail request
+      if (result.length === 0) {
+        console.log(
+          `No data detail requests found for pegawai: ${namaPegawai}`
+        );
+      }
 
       console.log("Data Detail Request:", result);
 

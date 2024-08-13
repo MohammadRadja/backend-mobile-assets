@@ -79,11 +79,17 @@ const barangController = {
           break;
 
         case "update":
-          const { id_barang, ...updateData } = data;
+          const { id_barang, id_satuan, ...updateData } = data; // Ambil id_satuan dari data
 
           result = await prisma.barang.update({
-            where: { id_barang },
-            data: updateData,
+            where: { id_barang: data.id_barang },
+            data: {
+              ...updateData, // Sertakan data lain yang ingin diupdate
+              satuan_barang: {
+                // Update relasi satuan_barang
+                connect: { id_satuan: data.id_satuan }, // Hubungkan ke satuan baru
+              },
+            },
           });
           console.log("Barang berhasil diperbarui:", result);
           break;
@@ -118,7 +124,7 @@ const barangController = {
       const { user } = req;
 
       // Memastikan pengguna memiliki peran pegawai
-      if (user.jabatan !== "pegawai") {
+      if (user.jabatan !== "petugas") {
         return res
           .status(403)
           .json({ success: false, message: "Akses tidak diizinkan" });
@@ -129,35 +135,20 @@ const barangController = {
 
       switch (action) {
         case "create":
-          // Validasi data input
-          if (
-            !data.id_user ||
-            !data.nama_barang ||
-            !data.jenis_barang ||
-            data.harga == null ||
-            data.stok_awal == null ||
-            data.terpakai == null ||
-            data.sisa == null
-          ) {
-            return res.status(400).json({
-              success: false,
-              message: "Field yang dibutuhkan hilang",
-            });
-          }
-
           // Membuat data baru
           result = await prisma.barang.create({
             data: {
               id_user: data.id_user,
               nama_barang: data.nama_barang,
               jenis_barang: data.jenis_barang,
+              id_satuan: data.id_satuan,
               harga: data.harga,
               stok_awal: data.stok_awal,
               terpakai: data.terpakai,
               sisa: data.sisa,
             },
             include: {
-              user: true,
+              satuan_barang: true,
             },
           });
           console.log("Barang berhasil dibuat oleh pegawai:", result);
@@ -169,20 +160,41 @@ const barangController = {
               id_barang: "asc",
             },
             include: {
-              user: true,
+              satuan_barang: true, // Menyertakan satuan yang terkait jika perlu
             },
           });
-          console.log("Data barang berhasil dibaca oleh pegawai:", result);
+          console.log("Data barang berhasil dibaca:", result);
           break;
 
         case "update":
-          const { id_barang: idBarangToUpdate, ...updateDataPetugas } = data;
+          const {
+            id_barang: idBarangToUpdate,
+            id_satuan,
+            ...updateDataPetugas
+          } = data;
 
-          result = await prisma.barang.update({
-            where: { id_barang: idBarangToUpdate },
-            data: updateDataPetugas,
-          });
-          console.log("Barang berhasil diperbarui oleh pegawai:", result);
+          try {
+            // Menyiapkan data pembaruan
+            const updateData = {
+              ...updateDataPetugas,
+              // Jika id_satuan diberikan, kita sambungkan ke satuan_barang
+              ...(id_satuan && {
+                satuan_barang: {
+                  connect: { id_satuan }, // Menghubungkan id_satuan yang baru
+                },
+              }),
+            };
+
+            // Melakukan pembaruan
+            result = await prisma.barang.update({
+              where: { id_barang: idBarangToUpdate },
+              data: updateData,
+            });
+
+            console.log("Barang berhasil diperbarui oleh pegawai:", result);
+          } catch (error) {
+            console.error("Kesalahan saat memperbarui barang:", error);
+          }
           break;
 
         case "delete":
@@ -214,19 +226,11 @@ const barangController = {
     try {
       const { user } = req;
 
-      // Memastikan pengguna memiliki peran pemilik
+      // Memastikan pengguna memiliki peran pegawai
       if (user.jabatan !== "pegawai") {
         return res
           .status(403)
           .json({ success: false, message: "Akses tidak diizinkan" });
-      }
-
-      const idPegawai = user.id_user || "";
-      if (!idPegawai) {
-        console.log("ID pemilik tidak ditemukan dalam objek pengguna.");
-        return res
-          .status(400)
-          .json({ success: false, message: "ID pemilik tidak ditemukan." });
       }
 
       const { action } = req.body;
@@ -241,26 +245,25 @@ const barangController = {
 
       switch (action) {
         case "read":
-          // Mengambil barang untuk pemilik
+          // Mengambil barang untuk pegawai
           const barangResult = await prisma.barang.findMany({
             orderBy: {
               id_barang: "asc",
             },
-            where: { id_user: idPegawai },
             include: {
-              satuan: true,
+              satuan_barang: true, // Menyertakan satuan yang terkait
             },
           });
 
           if (barangResult.length === 0) {
             return res.status(404).json({
               success: false,
-              message: "Tidak ada barang ditemukan untuk pemilik ini.",
+              message: "Tidak ada barang ditemukan untuk pegawai ini.",
             });
           }
 
           console.log(
-            "Data barang berhasil dibaca oleh pemilik:",
+            "Data barang berhasil dibaca oleh pegawai:",
             barangResult
           );
           return res.status(200).json({ success: true, data: barangResult });

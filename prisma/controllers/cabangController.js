@@ -220,7 +220,7 @@ const cabangController = {
 
       // Mengambil semua data Cabang
       const result = await prisma.cabang.findMany({
-        orderBy: { id_cabang: "asc" },
+        orderBy: { kode_cabang: "asc" },
       });
 
       return res.status(200).json({ success: true, data: result });
