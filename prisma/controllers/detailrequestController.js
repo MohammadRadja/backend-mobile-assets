@@ -29,8 +29,8 @@ const detailRequestController = {
         },
         select: {
           kode_request: true,
-          id_user: true,
-          id_barang: true,
+          nama_pegawai: true,
+          nama_barang: true,
           status: true,
           qty_request: true,
           subtotal: true,

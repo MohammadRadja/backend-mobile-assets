@@ -91,6 +91,16 @@ const cabangController = {
           });
 
         case "delete":
+          const cabang = await prisma.cabang.findUnique({
+            where: { kode_cabang: data.kode_cabang },
+          });
+
+          if (!cabang) {
+            return res.status(404).json({
+              success: false,
+              message: "Cabang tidak ditemukan.",
+            });
+          }
           // Menghapus data Cabang berdasarkan ID
           result = await prisma.cabang.delete({
             where: { kode_cabang: data.kode_cabang },
@@ -152,7 +162,7 @@ const cabangController = {
         case "read":
           // Mengambil semua data Cabang
           result = await prisma.cabang.findMany({
-            orderBy: { id_cabang: "asc" },
+            orderBy: { kode_cabang: "asc" },
           });
           return res.status(200).json({
             success: true,
@@ -163,7 +173,7 @@ const cabangController = {
         case "update":
           // Memperbarui data Cabang yang ada
           result = await prisma.cabang.update({
-            where: { id_cabang: data.id_cabang },
+            where: { kode_cabang: data.kode_cabang },
             data: { ...data },
           });
           return res.status(200).json({
@@ -175,7 +185,7 @@ const cabangController = {
         case "delete":
           // Menghapus data Cabang berdasarkan ID
           result = await prisma.cabang.delete({
-            where: { id_cabang: data.id_cabang },
+            where: { kode_cabang: data.kode_cabang },
           });
           return res.status(200).json({
             success: true,

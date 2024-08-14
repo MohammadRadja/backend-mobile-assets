@@ -23,7 +23,7 @@ const dataManajerController = {
           .json({ success: false, message: "Akses ditolak" });
       }
 
-      const idManager = user.id_user || "";
+      const idManager = user.id_user;
       const { action, data } = req.body;
       console.log("Action:", action); // Log data yang diterima
       console.log("Data diterima:", data);
@@ -31,10 +31,16 @@ const dataManajerController = {
 
       switch (action) {
         case "read":
-          result = await prisma.user.findMany({
+          console.log("GET ID Manager:", idManager);
+          result = await prisma.user.findUnique({
             where: { id_user: idManager },
-            orderBy: { id_user: "asc" },
           });
+          if (!result) {
+            console.log("ID Manager tidak ditemukan:", idManager);
+            return res
+              .status(404)
+              .json({ success: false, message: "Manager tidak ditemukan." });
+          }
           break;
 
         case "update":

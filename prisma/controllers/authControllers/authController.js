@@ -112,22 +112,6 @@ const forgotUser = async (username) => {
 const handleForgotPassword = async (req, res) => {
   const { username, newPassword, confirmPassword } = req.body;
 
-  // Validasi input
-  if (!newPassword || !confirmPassword || !username) {
-    return res.status(400).json({
-      success: false,
-      message: "Username, password baru, dan konfirmasi password harus diisi",
-    });
-  }
-
-  // Validasi kesesuaian password baru dan konfirmasi
-  if (newPassword !== confirmPassword) {
-    return res.status(400).json({
-      success: false,
-      message: "Password baru dan konfirmasi password tidak cocok",
-    });
-  }
-
   try {
     // Mencari pengguna berdasarkan username
     const user = await forgotUser(username);

@@ -41,11 +41,11 @@ const barangController = {
           }
 
           // Cek apakah nama barang sudah ada
-          const existingCabang = await prisma.cabang.findFirst({
-            where: { nama_cabang: data.nama_cabang },
+          const existingBarang = await prisma.barang.findFirst({
+            where: { nama_barang: data.nama_barang },
           });
 
-          if (existingCabang) {
+          if (existingBarang) {
             return res
               .status(400)
               .json({ success: false, message: "Nama Barang sudah ada" });

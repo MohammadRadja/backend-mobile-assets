@@ -14,17 +14,14 @@ const router = express.Router();
  * @access Private (manajer)
  */
 router.get(
-  "/manajer/exportDetaiRequest/pdf",
+  "/manajer/exportDetailRequest/pdf",
   authenticateToken,
   isManager,
   async (req, res, next) => {
     try {
       const result =
         await exportDetailRequestController.exportDetailRequestToPDF(req, res);
-      console.log(
-        "Laporan Detail Request PDF berhasil diambil oleh manajer:",
-        result
-      );
+      console.log("Laporan Detail Request PDF berhasil diambil oleh manajer");
     } catch (error) {
       console.error(
         "Gagal mendapatkan Laporan Detail PDF Request oleh manajer:",
@@ -41,7 +38,7 @@ router.get(
  * @access Private (manajer)
  */
 router.get(
-  "/manajer/exportDetaiRequest/excel",
+  "/manajer/exportDetailRequest/excel",
   authenticateToken,
   isManager,
   async (req, res, next) => {
@@ -71,7 +68,7 @@ router.get(
  * @access Private (petugas)
  */
 router.get(
-  "/petugas/exportDetaiRequest/pdf",
+  "/petugas/exportDetailRequest/pdf",
   authenticateToken,
   isOfficer,
   async (req, res, next) => {
@@ -98,7 +95,7 @@ router.get(
  * @access Private (petugas)
  */
 router.get(
-  "/petugas/exportDetaiRequest/excel",
+  "/petugas/exportDetailRequest/excel",
   authenticateToken,
   isOfficer,
   async (req, res, next) => {

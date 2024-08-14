@@ -33,8 +33,6 @@ export const authenticateToken = async (req, res, next) => {
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded JWT:", decoded);
-
     const user = await prisma.user.findUnique({
       where: {
         id_user: decoded.id,
@@ -46,7 +44,7 @@ export const authenticateToken = async (req, res, next) => {
       console.error(`No user found with id: ${decoded.id}`);
       return res.status(403).json({ success: false, message: "Invalid user" });
     }
-
+    console.log("User Info:", user); // Logging user info
     req.user = user;
     next();
   } catch (error) {
