@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { request } from "express";
 const prisma = new PrismaClient();
 
 /**
@@ -42,6 +43,7 @@ const formatDate = (date) => {
 /**
  * Menghasilkan kode request otomatis.
  * @returns {string} - Kode request dalam format REQYYMMDDNNNN.
+ * @throws {Error} - Jika tidak dapat menghasilkan kode unik.
  */
 const generateRequestCode = async () => {
   const now = new Date();
@@ -50,86 +52,69 @@ const generateRequestCode = async () => {
   const date = String(now.getDate()).padStart(2, "0");
 
   let sequenceNumber = 1;
-  let requestCode;
 
   while (true) {
-    requestCode = `REQ${year}${month}${date}${String(sequenceNumber).padStart(
-      4,
-      "0"
-    )}`;
+    const requestCode = `REQ${year}${month}${date}${String(
+      sequenceNumber
+    ).padStart(4, "0")}`;
 
     const existingRequest = await prisma.request.findUnique({
       where: { kode_request: requestCode },
     });
 
-    if (!existingRequest) break;
+    if (!existingRequest) {
+      return requestCode; // Kode unik ditemukan
+    }
 
     sequenceNumber++;
     if (sequenceNumber > 9999) {
       throw new Error("Unable to generate unique request code.");
     }
   }
-
-  return requestCode;
 };
 
+// Controller untuk mengelola CRUD permintaan
 const requestController = {
-  /**
-   * Fungsi untuk mengelola CRUD permintaan oleh admin.
-   * @param {Object} req - Objek request.
-   * @param {Object} res - Objek response.
-   */
+  // Fungsi untuk mengelola CRUD permintaan oleh admin
   manajerCRUDRequest: async (req, res) => {
     try {
       const { user } = req;
 
-      // Memeriksa apakah pengguna adalah manajer
+      // Memastikan user memiliki peran petugas
       if (user.jabatan !== "manajer") {
         return res
           .status(403)
-          .json({ success: false, message: "Akses tidak diizinkan" });
+          .json({ success: false, message: "Akses ditolak" });
       }
 
       const { action, data } = req.body;
-      console.log("Aksi diterima:", action); // Log aksi yang diterima
-      console.log("Data diterima:", data); // Log data yang diterima
 
       let result;
 
       switch (action) {
         case "create":
-          // Menghasilkan kode request otomatis
+          const requiredFields = [
+            "kode_cabang",
+            "id_user",
+            "id_barang",
+            "id_satuan",
+            "tanggal_request",
+            "jumlah_barang",
+            "keperluan",
+            "status",
+          ];
+
+          for (const field of requiredFields) {
+            if (!data[field]) {
+              return res.status(400).json({
+                success: false,
+                message: `Field ${field} tidak boleh kosong`,
+              });
+            }
+          }
+
           const requestCode = await generateRequestCode();
-          console.log("Request Code generated:", requestCode);
-
-          // Validasi input untuk aksi create
-          if (
-            !data.kode_cabang ||
-            !data.id_user ||
-            !data.id_barang ||
-            !data.id_satuan ||
-            !data.tanggal_request ||
-            !data.jumlah_barang ||
-            !data.keperluan ||
-            !data.status
-          ) {
-            return res.status(400).json({
-              success: false,
-              message: "Field yang diperlukan hilang",
-            });
-          }
-
-          // Pastikan requestCode tidak kosong setelah di-generate
-          if (!requestCode) {
-            return res.status(400).json({
-              success: false,
-              message: "Kode request tidak dapat dihasilkan",
-            });
-          }
-
-          // Mulai transaksi untuk membuat request dan approval
           result = await prisma.$transaction(async (prisma) => {
-            // Membuat request
             const newRequest = await prisma.request.create({
               data: {
                 kode_request: requestCode,
@@ -145,33 +130,155 @@ const requestController = {
               },
             });
 
-            console.log("Permintaan berhasil dibuat:", newRequest);
-
-            // Membuat approval untuk request yang baru dibuat
-            const newApproval = await prisma.approval.create({
+            await prisma.approval.create({
               data: {
-                userID: data.id_user, // Menggunakan ID pengguna yang sama
-                requestID: newRequest.kode_request, // Menggunakan kode request yang baru dibuat
-                status: "Pending", // Status awal untuk approval
+                userID: data.id_user,
+                requestID: newRequest.kode_request,
+                status: "pending",
               },
             });
 
-            console.log("Approval berhasil dibuat:", newApproval);
-
-            return { newRequest, newApproval };
+            return newRequest;
           });
 
-          // Mengembalikan respon berhasil
-          return res.status(201).json({
+          return res.status(200).json({
             success: true,
             message: "Permintaan dan approval berhasil dibuat",
             data: result,
           });
 
         case "read":
-          // Membaca data permintaan
           result = await prisma.request.findMany({
             orderBy: { kode_request: "asc" },
+            include: {
+              user: { select: { username: true } },
+              barang: { select: { nama_barang: true } },
+              satuan_barang: { select: { nama_satuan: true } },
+            },
+          });
+          break;
+
+        case "update":
+          if (!data.kode_request) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Kode permintaan hilang" });
+          }
+
+          const requestToUpdate = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
+          });
+
+          if (!requestToUpdate) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
+          }
+
+          result = await prisma.request.update({
+            where: { kode_request: data.kode_request },
+            data: { ...data, tanggal_request: parseDate(data.tanggal_request) },
+          });
+          break;
+
+        case "delete":
+          if (!data.kode_request) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Kode permintaan hilang" });
+          }
+
+          const requestToDelete = await prisma.request.findUnique({
+            where: { kode_request: data.kode_request },
+          });
+
+          if (!requestToDelete) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Permintaan tidak ditemukan" });
+          }
+
+          result = await prisma.request.delete({
+            where: { kode_request: data.kode_request },
+          });
+          break;
+
+        default:
+          return res
+            .status(400)
+            .json({ success: false, message: "Aksi tidak valid" });
+      }
+
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error di manajerCRUDRequest:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  // Fungsi untuk mengelola CRUD permintaan oleh petugas
+  petugasCRUDRequest: async (req, res) => {
+    try {
+      const { user } = req;
+
+      // Memastikan user memiliki peran petugas
+      if (user.jabatan !== "petugas") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses ditolak" });
+      }
+
+      const { action, data } = req.body;
+
+      let result;
+
+      switch (action) {
+        case "create":
+          const requiredFields = [
+            "kode_cabang",
+            "id_user",
+            "id_barang",
+            "id_satuan",
+            "tanggal_request",
+            "jumlah_barang",
+            "keperluan",
+            "status",
+          ];
+
+          for (const field of requiredFields) {
+            if (!data[field]) {
+              return res.status(400).json({
+                success: false,
+                message: `Field ${field} tidak boleh kosong`,
+              });
+            }
+          }
+
+          const requestCode = await generateRequestCode();
+
+          result = await prisma.request.create({
+            data: {
+              kode_request: requestCode,
+              cabang: { connect: { kode_cabang: data.kode_cabang } },
+              user: { connect: { id_user: data.id_user } },
+              barang: { connect: { id_barang: data.id_barang } },
+              satuan_barang: { connect: { id_satuan: data.id_satuan } },
+              tanggal_request: parseDate(data.tanggal_request),
+              department: data.department,
+              jumlah_barang: data.jumlah_barang,
+              keperluan: data.keperluan,
+              status: "pending",
+            },
+          });
+
+          return res.status(201).json({
+            success: true,
+            message: "Permintaan berhasil dibuat",
+            data: result,
+          });
+
+        case "read":
+          result = await prisma.request.findMany({
             select: {
               kode_request: true,
               kode_cabang: true,
@@ -188,18 +295,16 @@ const requestController = {
               status: true,
             },
           });
-          console.log("Data Permintaan:", result);
+
           return res.status(200).json({ success: true, data: result });
 
         case "update":
-          // Validasi input untuk aksi update
           if (!data.kode_request) {
             return res
               .status(400)
               .json({ success: false, message: "Kode permintaan hilang" });
           }
 
-          // Memeriksa apakah rekaman ada sebelum diperbarui
           const requestToUpdate = await prisma.request.findUnique({
             where: { kode_request: data.kode_request },
           });
@@ -209,12 +314,7 @@ const requestController = {
               .status(404)
               .json({ success: false, message: "Permintaan tidak ditemukan" });
           }
-          console.log(
-            "Permintaan yang akan diperbarui ditemukan:",
-            requestToUpdate
-          );
 
-          // Perbarui data permintaan
           result = await prisma.request.update({
             where: { kode_request: data.kode_request },
             data: {
@@ -229,18 +329,16 @@ const requestController = {
               status: data.status,
             },
           });
-          console.log("Update berhasil:", result);
+
           return res.status(200).json({ success: true, data: result });
 
         case "delete":
-          // Validasi input untuk aksi delete
           if (!data.kode_request) {
             return res
               .status(400)
               .json({ success: false, message: "Kode permintaan hilang" });
           }
 
-          // Memeriksa apakah rekaman ada sebelum dihapus
           const requestToDelete = await prisma.request.findUnique({
             where: { kode_request: data.kode_request },
           });
@@ -250,16 +348,11 @@ const requestController = {
               .status(404)
               .json({ success: false, message: "Permintaan tidak ditemukan" });
           }
-          console.log(
-            "Permintaan yang akan dihapus ditemukan:",
-            requestToDelete
-          );
 
-          // Menghapus permintaan
           result = await prisma.request.delete({
             where: { kode_request: data.kode_request },
           });
-          console.log("Delete berhasil:", result);
+
           return res.status(200).json({ success: true, data: result });
 
         default:
@@ -267,276 +360,85 @@ const requestController = {
             .status(400)
             .json({ success: false, message: "Aksi tidak valid" });
       }
-    } catch (error) {
-      console.error("Error di manajerCRUDRequest:", error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  },
-
-  /**
-   * Fungsi untuk mengelola CRUD permintaan oleh petugas.
-   * @param {Object} req - Objek request.
-   * @param {Object} res - Objek response.
-   */
-  petugasCRUDRequest: async (req, res) => {
-    try {
-      const { user } = req;
-
-      // Verifikasi peran pengguna
-      if (user.jabatan !== "petugas") {
-        return res
-          .status(403)
-          .json({ success: false, message: "Akses tidak sah" });
-      }
-
-      const { action, data } = req.body;
-      console.log("Aksi diterima:", action); // Log aksi yang diterima
-      console.log("Data diterima:", data); // Log data yang diterima
-
-      let result;
-
-      switch (action) {
-        case "create":
-          // Validasi input untuk aksi create
-          if (
-            !data.kode_cabang ||
-            !data.id_user ||
-            !data.id_barang ||
-            !data.id_satuan ||
-            !data.tanggal_request ||
-            !data.jumlah_barang ||
-            !data.keperluan ||
-            !data.status
-          ) {
-            return res.status(400).json({
-              success: false,
-              message: "Field yang diperlukan hilang",
-            });
-          }
-
-          // Menghasilkan kode request otomatis
-          const requestCode = await generateRequestCode();
-
-          result = await prisma.request.create({
-            data: {
-              kode_request: requestCode, // Menggunakan kode yang dihasilkan
-              kode_cabang: data.kode_cabang,
-              id_user: data.id_user,
-              id_barang: data.id_barang,
-              id_satuan: data.id_satuan,
-              tanggal_request: parseDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
-              department: data.department,
-              jumlah_barang: data.jumlah_barang,
-              keperluan: data.keperluan,
-              status: data.status,
-            },
-          });
-          console.log("Permintaan berhasil dibuat:", result);
-          break;
-
-        case "read":
-          // Membaca data permintaan
-          result = await prisma.request.findMany({
-            orderBy: {
-              kode_request: "asc",
-            },
-            select: {
-              kode_request: true,
-              kode_cabang: true,
-              id_user: true,
-              user: {
-                select: {
-                  username: true,
-                },
-              },
-              id_barang: true,
-              barang: {
-                select: {
-                  nama_barang: true,
-                },
-              },
-              id_satuan: true,
-              satuan_barang: {
-                select: {
-                  nama_satuan: true,
-                },
-              },
-              tanggal_request: true,
-              department: true,
-              jumlah_barang: true,
-              keperluan: true,
-              status: true,
-            },
-          });
-          console.log("Data Permintaan:", result);
-          break;
-
-        case "update":
-          // Validasi input untuk aksi update
-          if (!data.kode_request) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Kode permintaan hilang" });
-          }
-
-          // Memeriksa apakah rekaman ada sebelum diperbarui
-          const requestToUpdate = await prisma.request.findUnique({
-            where: { kode_request: data.kode_request },
-          });
-
-          if (!requestToUpdate) {
-            return res
-              .status(404)
-              .json({ success: false, message: "Permintaan tidak ditemukan" });
-          }
-          console.log(
-            "Permintaan yang akan diperbarui ditemukan:",
-            requestToUpdate
-          );
-
-          // Perbarui data permintaan
-          result = await prisma.request.update({
-            where: { kode_request: data.kode_request },
-            data: {
-              kode_cabang: data.kode_cabang,
-              id_user: data.id_user,
-              id_barang: data.id_barang,
-              id_satuan: data.id_satuan,
-              tanggal_request: formatDate(data.tanggal_request),
-              department: data.department,
-              jumlah_barang: data.jumlah_barang,
-              keperluan: data.keperluan,
-              status: data.status,
-            },
-          });
-          console.log("Update berhasil:", result);
-          break;
-
-        case "delete":
-          // Validasi input untuk aksi delete
-          if (!data.kode_request) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Kode permintaan hilang" });
-          }
-
-          // Memeriksa apakah rekaman ada sebelum dihapus
-          const requestToDelete = await prisma.request.findUnique({
-            where: { kode_request: data.kode_request },
-          });
-
-          if (!requestToDelete) {
-            return res
-              .status(404)
-              .json({ success: false, message: "Permintaan tidak ditemukan" });
-          }
-          console.log(
-            "Permintaan yang akan dihapus ditemukan:",
-            requestToDelete
-          );
-
-          // Menghapus permintaan
-          result = await prisma.request.delete({
-            where: { kode_request: data.kode_request },
-          });
-          console.log("Delete berhasil:", result);
-          break;
-
-        default:
-          return res
-            .status(400)
-            .json({ success: false, message: "Aksi tidak valid" });
-      }
-      return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.error("Error di petugasCRUDRequest:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },
 
+  // Fungsi untuk mengelola CRUD permintaan oleh pegawai
   pegawaiCRUDRequest: async (req, res) => {
     try {
       const { user } = req;
 
-      // Verifikasi peran pengguna
+      // Memastikan user memiliki peran petugas
       if (user.jabatan !== "pegawai") {
         return res
           .status(403)
-          .json({ success: false, message: "Akses tidak sah" });
+          .json({ success: false, message: "Akses ditolak" });
       }
 
-      const idPegawai = user.id_user || ""; // Ganti dengan logika yang sesuai jika diperlukan
       const { action, data } = req.body;
-      console.log("Data diterima:", data);
+
       let result;
 
       switch (action) {
         case "create":
-          // Validasi input untuk aksi create
-          if (
-            !data.kode_cabang ||
-            !data.id_user ||
-            !data.id_barang ||
-            !data.id_satuan ||
-            !data.tanggal_request ||
-            !data.jumlah_barang ||
-            !data.keperluan ||
-            !data.status
-          ) {
-            return res.status(400).json({
-              success: false,
-              message: "Field yang diperlukan hilang",
-            });
+          const requiredFields = [
+            "kode_cabang",
+            "id_user",
+            "id_barang",
+            "id_satuan",
+            "tanggal_request",
+            "jumlah_barang",
+            "keperluan",
+            "status",
+          ];
+
+          for (const field of requiredFields) {
+            if (!data[field]) {
+              return res.status(400).json({
+                success: false,
+                message: `Field ${field} tidak boleh kosong`,
+              });
+            }
           }
 
-          // Menghasilkan kode request otomatis
           const requestCode = await generateRequestCode();
 
           result = await prisma.request.create({
             data: {
-              kode_request: requestCode, // Menggunakan kode yang dihasilkan
-              kode_cabang: data.kode_cabang,
-              id_user: data.id_user,
-              id_barang: data.id_barang,
-              id_satuan: data.id_satuan,
-              tanggal_request: parseDate(data.tanggal_request), // Pastikan tanggal dalam format yang benar
+              kode_request: requestCode,
+              cabang: { connect: { kode_cabang: data.kode_cabang } },
+              user: { connect: { id_user: data.id_user } },
+              barang: { connect: { id_barang: data.id_barang } },
+              satuan_barang: { connect: { id_satuan: data.id_satuan } },
+              tanggal_request: parseDate(data.tanggal_request),
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,
-              status: data.status,
+              status: "pending",
             },
           });
-          console.log("Permintaan berhasil dibuat:", result);
-          break;
+
+          return res.status(201).json({
+            success: true,
+            message: "Permintaan berhasil dibuat",
+            data: result,
+          });
 
         case "read":
-          // Membaca data permintaan
           result = await prisma.request.findMany({
-            where: { id_user: idPegawai },
-            orderBy: {
-              kode_request: "asc",
-            },
+            where: { id_user: user.id_user },
             select: {
               kode_request: true,
               kode_cabang: true,
               id_user: true,
-              user: {
-                select: {
-                  username: true,
-                },
-              },
+              user: { select: { username: true } },
               id_barang: true,
-              barang: {
-                select: {
-                  nama_barang: true,
-                },
-              },
+              barang: { select: { nama_barang: true } },
               id_satuan: true,
-              satuan_barang: {
-                select: {
-                  nama_satuan: true,
-                },
-              },
+              satuan_barang: { select: { nama_satuan: true } },
               tanggal_request: true,
               department: true,
               jumlah_barang: true,
@@ -544,18 +446,16 @@ const requestController = {
               status: true,
             },
           });
-          console.log("Data Permintaan:", result);
-          break;
+
+          return res.status(200).json({ success: true, data: result });
 
         case "update":
-          // Validasi input untuk aksi update
           if (!data.kode_request) {
             return res
               .status(400)
               .json({ success: false, message: "Kode permintaan hilang" });
           }
 
-          // Memeriksa apakah rekaman ada sebelum diperbarui
           const requestToUpdate = await prisma.request.findUnique({
             where: { kode_request: data.kode_request },
           });
@@ -565,12 +465,7 @@ const requestController = {
               .status(404)
               .json({ success: false, message: "Permintaan tidak ditemukan" });
           }
-          console.log(
-            "Permintaan yang akan diperbarui ditemukan:",
-            requestToUpdate
-          );
 
-          // Perbarui data permintaan
           result = await prisma.request.update({
             where: { kode_request: data.kode_request },
             data: {
@@ -578,25 +473,23 @@ const requestController = {
               id_user: data.id_user,
               id_barang: data.id_barang,
               id_satuan: data.id_satuan,
-              tanggal_request: formatDate(data.tanggal_request),
+              tanggal_request: parseDate(data.tanggal_request),
               department: data.department,
               jumlah_barang: data.jumlah_barang,
               keperluan: data.keperluan,
               status: data.status,
             },
           });
-          console.log("Update berhasil:", result);
-          break;
+
+          return res.status(200).json({ success: true, data: result });
 
         case "delete":
-          // Validasi input untuk aksi delete
           if (!data.kode_request) {
             return res
               .status(400)
               .json({ success: false, message: "Kode permintaan hilang" });
           }
 
-          // Memeriksa apakah rekaman ada sebelum dihapus
           const requestToDelete = await prisma.request.findUnique({
             where: { kode_request: data.kode_request },
           });
@@ -606,26 +499,20 @@ const requestController = {
               .status(404)
               .json({ success: false, message: "Permintaan tidak ditemukan" });
           }
-          console.log(
-            "Permintaan yang akan dihapus ditemukan:",
-            requestToDelete
-          );
 
-          // Menghapus permintaan
           result = await prisma.request.delete({
             where: { kode_request: data.kode_request },
           });
-          console.log("Delete berhasil:", result);
-          break;
+
+          return res.status(200).json({ success: true, data: result });
 
         default:
           return res
             .status(400)
             .json({ success: false, message: "Aksi tidak valid" });
       }
-      return res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error("Error Pegawai In CRUD Request:", error);
+      console.error("Error di pegawaiCRUDRequest:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },

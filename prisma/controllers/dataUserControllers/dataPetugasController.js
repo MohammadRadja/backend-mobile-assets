@@ -30,19 +30,6 @@ const dataPetugasController = {
       // Menentukan tindakan berdasarkan action yang diterima
       switch (action) {
         case "create":
-          // Cek apakah username sudah ada
-          const existUsername = await prisma.user.findFirst({
-            where: {
-              username: data.username,
-            },
-          });
-          if (existUsername) {
-            return res.status(400).json({
-              success: false,
-              message: "Username Petugas sudah ada",
-            });
-          }
-
           // Hash password sebelum menyimpan ke database
           const hash = await bcrypt.hash(data.password, 10);
           result = await prisma.user.create({

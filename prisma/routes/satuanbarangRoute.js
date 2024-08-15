@@ -209,7 +209,6 @@ router.post(
         res
       );
       console.log("Satuan barang berhasil dibuat oleh pegawai:", result);
-      res.status(200).json(result);
     } catch (error) {
       console.error("Gagal membuat satuan barang oleh pegawai:", error);
       next(error);
@@ -233,7 +232,6 @@ router.get(
         res
       );
       console.log("Satuan barang berhasil diambil oleh pegawai:", result);
-      res.status(200).json(result);
     } catch (error) {
       console.error("Gagal mendapatkan satuan barang oleh pegawai:", error);
       next(error);

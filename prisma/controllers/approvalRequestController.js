@@ -1,47 +1,78 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-/**
- * Fungsi untuk mengelola approval permintaan oleh petugas atau manajer.
- * @param {Object} req - Objek request.
- * @param {Object} res - Objek response.
- */
 const approvalRequestController = {
-  /**
-   * Fungsi untuk approval permintaan oleh petugas.
-   * @param {Object} req - Objek request.
-   * @param {Object} res - Objek response.
-   */
-  approveByPetugas: async (req, res) => {
+  ApprovalReadByPetugas: async (req, res) => {
     try {
       const { user } = req;
-      console.log("User dari request:", user);
 
-      // Verifikasi peran pengguna
       if (user.jabatan !== "petugas") {
         return res
           .status(403)
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
-      const { data } = req.body;
-      const { requestID, status } = data; // Mengambil requestID dan status dari body
+      const approvals = await prisma.approval.findMany({
+        include: {
+          request: true,
+          user: true,
+        },
+      });
 
-      // Validasi requestID
+      return res.status(200).json({ success: true, data: approvals });
+    } catch (error) {
+      console.error("Error di ApprovalReadByPetugas:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  ApprovalReadByManajer: async (req, res) => {
+    try {
+      const { user } = req;
+
+      if (user.jabatan !== "manajer") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses tidak diizinkan" });
+      }
+
+      const approvals = await prisma.approval.findMany({
+        include: {
+          request: true,
+          user: true,
+        },
+      });
+
+      return res.status(200).json({ success: true, data: approvals });
+    } catch (error) {
+      console.error("Error di ApprovalReadByManajer:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  approveByPetugas: async (req, res) => {
+    try {
+      const { user } = req;
+      if (user.jabatan !== "petugas") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses tidak diizinkan" });
+      }
+
+      const { requestID, status } = req.body;
+
       if (!requestID) {
         return res
           .status(400)
           .json({ success: false, message: "requestID tidak boleh kosong" });
       }
 
-      // Validasi status
       if (!status) {
         return res
           .status(400)
           .json({ success: false, message: "status tidak boleh kosong" });
       }
 
-      // Cari permintaan berdasarkan requestID
       const request = await prisma.request.findUnique({
         where: { kode_request: requestID },
         include: { approval: true },
@@ -53,38 +84,34 @@ const approvalRequestController = {
           .json({ success: false, message: "Permintaan tidak ditemukan" });
       }
 
-      if (!request.approval) {
+      if (!Array.isArray(request.approval)) {
         return res
           .status(400)
           .json({ success: false, message: "Data approval tidak valid" });
       }
 
-      // Log request untuk debugging
-      console.log("Request yang ditemukan:", request);
-
-      // Cek apakah petugas sudah melakukan approval
-      const existingApproval = request.approval.find(
-        (approval) => approval.userID === user.id_user
-      );
-      if (existingApproval) {
+      // Memastikan status permintaan tidak dalam keadaan 'pending'
+      if (request.status === "proses") {
         return res.status(400).json({
           success: false,
-          message: "Anda sudah melakukan approval",
+          message: "Anda sudah melakukan approval/rejected",
         });
       }
 
-      // Update status request berdasarkan hasil approval
-      const newStatus = status === "approved" ? "proses" : "ditolak";
+      // Memastikan status permintaan tidak dalam keadaan 'proses'
+      const existingApprovalPetugas = request.approval.find(
+        (approval) => approval.requestID === requestID
+      );
+
       await prisma.request.update({
         where: { kode_request: request.kode_request },
-        data: { status: newStatus },
+        data: { status: "proses" },
       });
 
-      await prisma.approval.create({
+      await prisma.approval.update({
+        where: { id_approval: existingApprovalPetugas.id_approval },
         data: {
-          status: status,
-          requestID: request.kode_request,
-          userID: user.id_user,
+          status: "proses",
         },
       });
 
@@ -100,40 +127,29 @@ const approvalRequestController = {
     }
   },
 
-  /**
-   * Fungsi untuk approval permintaan oleh manajer.
-   * @param {Object} req - Objek request.
-   * @param {Object} res - Objek response.
-   */
   approveByManajer: async (req, res) => {
     try {
       const { user } = req;
-
-      // Memeriksa apakah pengguna adalah manajer
       if (user.jabatan !== "manajer") {
         return res
           .status(403)
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
-      const { data } = req.body;
-      const { requestID, status } = data; // Mengambil requestID dan status dari body
+      const { requestID, status } = req.body;
 
-      // Validasi requestID
       if (!requestID) {
         return res
           .status(400)
           .json({ success: false, message: "requestID tidak boleh kosong" });
       }
 
-      // Validasi status
       if (!status) {
         return res
           .status(400)
           .json({ success: false, message: "status tidak boleh kosong" });
       }
 
-      // Cari permintaan berdasarkan requestID
       const request = await prisma.request.findUnique({
         where: { kode_request: requestID },
         include: { approval: true },
@@ -145,45 +161,60 @@ const approvalRequestController = {
           .json({ success: false, message: "Permintaan tidak ditemukan" });
       }
 
-      if (!request.approval || !Array.isArray(request.approval)) {
+      if (!Array.isArray(request.approval)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Data approval tidak valid" });
+      }
+
+      // Memastikan status permintaan tidak dalam keadaan 'disetujui' atau 'ditolak'
+      if (request.status === "disetujui" || request.status === "ditolak") {
         return res.status(400).json({
           success: false,
-          message: "Data approval tidak valid",
+          message: "Anda sudah melakukan approval/rejected",
         });
       }
 
-      // Cek apakah request sudah ditolak oleh petugas
-      if (request.status === "ditolak") {
+      // Memastikan status permintaan dalam keadaan 'proses'
+      if (request.status !== "proses") {
+        return res.status(400).json({
+          success: false,
+          message: "Permintaan tidak dalam keadaan diproses",
+        });
+      }
+
+      // Cari approval petugas
+      const existingApproval = request.approval.find(
+        (approval) => approval.requestID === requestID
+      );
+
+      // if (!existingApproval) {
+      //   return res.status(404).json({
+      //     success: false,
+      //     message: "Approval dari petugas tidak ditemukan",
+      //   });
+      // }
+
+      // Memeriksa status approval petugas
+      if (existingApproval.status === "rejected") {
         return res.status(400).json({
           success: false,
           message: "Permintaan sudah ditolak oleh petugas",
         });
       }
 
-      // Cek apakah manajer sudah melakukan approval
-      const existingApproval = request.approval.find(
-        (approval) => approval.userID === user.id_user
-      );
-      if (existingApproval) {
-        return res.status(400).json({
-          success: false,
-          message: "Anda sudah melakukan approval",
-        });
-      }
-
-      // Update status request berdasarkan hasil approval
       const newStatus = status === "approved" ? "disetujui" : "ditolak";
+
+      // Update status request
       await prisma.request.update({
         where: { kode_request: request.kode_request },
         data: { status: newStatus },
       });
 
-      await prisma.approval.create({
-        data: {
-          status: status,
-          requestID: request.kode_request,
-          userID: user.id_user,
-        },
+      // Update status approval petugas
+      await prisma.approval.update({
+        where: { id_approval: existingApproval.id_approval },
+        data: { status: status },
       });
 
       return res.status(200).json({
@@ -194,6 +225,170 @@ const approvalRequestController = {
       });
     } catch (error) {
       console.error("Error di approveByManajer:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  rejectedByPetugas: async (req, res) => {
+    try {
+      const { user } = req;
+      if (user.jabatan !== "petugas") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses tidak diizinkan" });
+      }
+
+      const { requestID, status } = req.body;
+
+      if (!requestID) {
+        return res
+          .status(400)
+          .json({ success: false, message: "requestID tidak boleh kosong" });
+      }
+
+      if (!status) {
+        return res
+          .status(400)
+          .json({ success: false, message: "status tidak boleh kosong" });
+      }
+
+      const request = await prisma.request.findUnique({
+        where: { kode_request: requestID },
+        include: { approval: true },
+      });
+
+      if (!request) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Permintaan tidak ditemukan" });
+      }
+
+      // Memastikan status permintaan tidak dalam keadaan 'pending'
+      if (request.status === "proses") {
+        return res.status(400).json({
+          success: false,
+          message: "Anda sudah melakukan approval/rejected",
+        });
+      }
+
+      // Cari approval petugas
+      const existingApproval = request.approval.find(
+        (approval) => approval.requestID === requestID
+      );
+
+      const newStatus = status === "rejected" ? "ditolak" : request.status;
+      await prisma.request.update({
+        where: { kode_request: request.kode_request },
+        data: { status: newStatus },
+      });
+
+      await prisma.approval.update({
+        where: { id_approval: existingApproval.id_approval },
+        data: {
+          status: status,
+        },
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: `Request berhasil ${
+          status === "rejected" ? "ditolak" : "diproses ulang"
+        }`,
+      });
+    } catch (error) {
+      console.error("Error di rejectedByPetugas:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  rejectedByManajer: async (req, res) => {
+    try {
+      const { user } = req;
+      if (user.jabatan !== "manajer") {
+        return res
+          .status(403)
+          .json({ success: false, message: "Akses tidak diizinkan" });
+      }
+
+      const { requestID, status } = req.body;
+
+      if (!requestID) {
+        return res
+          .status(400)
+          .json({ success: false, message: "requestID tidak boleh kosong" });
+      }
+
+      if (!status) {
+        return res
+          .status(400)
+          .json({ success: false, message: "status tidak boleh kosong" });
+      }
+
+      const request = await prisma.request.findUnique({
+        where: { kode_request: requestID },
+        include: { approval: true },
+      });
+
+      if (!request) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Permintaan tidak ditemukan" });
+      }
+
+      // Memastikan status permintaan tidak dalam keadaan 'ditolak'
+      if (request.status === "ditolak") {
+        return res.status(400).json({
+          success: false,
+          message: "Permintaan sudah ditolak sebelumnya",
+        });
+      }
+
+      // Pastikan status permintaan dalam keadaan 'proses'
+      if (request.status !== "proses") {
+        return res.status(400).json({
+          success: false,
+          message: "Permintaan tidak dalam keadaan diproses",
+        });
+      }
+
+      // Ambil ID pengguna yang memiliki jabatan 'petugas'
+      const petugas = await prisma.user.findFirst({
+        where: { jabatan: "petugas" },
+        select: { id_user: true },
+      });
+
+      if (!petugas) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengguna petugas tidak ditemukan",
+        });
+      }
+      // Cari approval petugas
+      const existingApproval = request.approval.find(
+        (approval) => approval.requestID === requestID
+      );
+
+      const newStatus = status === "rejected" ? "ditolak" : request.status;
+      await prisma.request.update({
+        where: { kode_request: request.kode_request },
+        data: { status: newStatus },
+      });
+
+      await prisma.approval.update({
+        where: { id_approval: existingApproval.id_approval },
+        data: {
+          status: status,
+        },
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: `Request berhasil ${
+          status === "rejected" ? "ditolak" : "diproses ulang"
+        }`,
+      });
+    } catch (error) {
+      console.error("Error di rejectedByManajer:", error);
       return res.status(500).json({ success: false, message: error.message });
     }
   },

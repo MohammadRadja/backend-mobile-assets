@@ -26,15 +26,6 @@ const dataPegawaiController = {
 
       switch (action) {
         case "create":
-          const existUsername = await prisma.user.findFirst({
-            where: { username: data.username },
-          });
-          if (existUsername) {
-            return res.status(400).json({
-              success: false,
-              message: "Username Pegawai sudah ada",
-            });
-          }
           const hash = await bcrypt.hash(data.password, 10);
           result = await prisma.user.create({
             data: {
@@ -119,15 +110,13 @@ const dataPegawaiController = {
 
       switch (action) {
         case "create":
-          const existUsername = await prisma.user.findFirst({
-            where: { username: data.username },
-          });
-          if (existUsername) {
+          if (!data || !data.username || !data.password || !data.jabatan) {
             return res.status(400).json({
               success: false,
-              message: "Username Pegawai sudah ada",
+              message: "Data Pegawai tidak lengkap.",
             });
           }
+
           const hash = await bcrypt.hash(data.password, 10);
           result = await prisma.user.create({
             data: {
@@ -194,7 +183,7 @@ const dataPegawaiController = {
           .json({ success: false, message: "Akses tidak diizinkan" });
       }
 
-      const idPegawai = user.id_user || "";
+      const idPegawai = user.id_user;
       const { action, data } = req.body;
       console.log("Action:", action);
       console.log("Data diterima:", data);
